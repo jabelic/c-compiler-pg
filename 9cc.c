@@ -1,5 +1,18 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
+#include <stdbool.h>
+#include <string.h>
+
+// トークンの種類
+typedef enum {
+    TK_RESERVED,
+    TK_NUM,
+    TK_EOF,
+} Tokenkind;
+
+typedef struct Token Token;
+
 
 int main(int argc, char **argv) {
     if (argc != 2) {
