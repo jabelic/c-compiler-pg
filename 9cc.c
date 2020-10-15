@@ -47,7 +47,6 @@ bool consume (char op){
         return false;
     token = token->next;
     return true;
-
 }
 
 
