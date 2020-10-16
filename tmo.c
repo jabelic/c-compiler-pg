@@ -1,10 +1,14 @@
 #include <stdio.h>
 #include <string.h>
-#define STR_EQ(s1,s2)       strcmp(s1, s2)==0
-void error(char *fmt){
-    va_list ap;
-    printf("%s", fmt);
-}
+
+
+// トークンの種類 列挙型
+typedef enum {
+    TK_RESERVED, // 記号
+    TK_NUM,  // 整数トークン
+    TK_EOF, // 入力の終わりを表すトークン
+} Tokenkind; //0,1,2
+
 
 int main(void){
     /*if( STR_EQ( "abc", "abc" ) ){
@@ -12,10 +16,6 @@ int main(void){
     }if( !STR_EQ( "abc", "ab" ) ){
         puts( "OK" );
     }*/
-
-    char x = "app";
-    printf("%c", x);
-    error(x);
     return 0;
 }
 
