@@ -3,6 +3,8 @@
 #include <ctype.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdarg.h>
+
 
 // トークンの種類 列挙型
 typedef enum {
@@ -20,23 +22,22 @@ typedef struct Token Token; //Tokenという名前のTokenという型を定義
 struct Token{
     Tokenkind kind; // トークンの型  kind.TK_NUM = 1;と言うふうにできる？
     Token *next;   // 次の入力トークン
-    int val;       // kindがTK_NUM(つまり1?)の場合, その数値
+    int val;       // kindがTK_NUMの場合, その数値
     char *str;     // トークン文字列
 };
 // linked listを書いている??
-
 
 // 現在着目しているトークン
 Token *token;
 
 // エラーを報告するための関数
-// printfと同じ引数を取る: *fnt = "hoge%d\n"
+// printfと同じ引数を取る: *fmt = "hoge%d\n"
 void error(char *fmt, ...){
     va_list ap;
     va_start(ap, fmt);
     vfprintf(stderr, fmt, ap);
-    fprintf(stderr, "\n"); //stderrに"\n"を渡す
-    exit(1);
+    fprintf(stderr, "\n"); //"\n"が出力される. つまり改行をもうここに組み込んでしまおうと？
+    exit(1); // va_end()の代わりですかね.
 }// stderrにErrorメッセージが格納される？
 
 
@@ -81,7 +82,34 @@ Token *new_token(Tokenkind kind, Token *cur, char *str) {
     return tok;
 }
 
+Token *tokenize(char *p){
+    Token head;
+    head.next = NULL;
+    Token *cur = &head;
 
+    while (*p){
+        // 空白文字をスキップ
+        if (isspace(*p)){
+            p++;
+            continue;
+        }
+
+        if (*p == '+' || *p == '-'){
+            cur = new_token(TK_RESERVED, cur, p++); // 次の文字のポインタをcurにつなげる
+            continue;
+        }
+
+        if (isdigit(*p)){
+            cur = new_token(TK_NUM, cur, p);
+            cur->val = strtol(p, &p, 10); // pの先頭が数字ならn(今は10)進法でlong型に変換. 違ったらその文字のポインタを&pに格納
+            continue;
+        }
+
+        error("Couldn't tokenize...");
+    }
+    new_token(TK_EOF, cur, p);
+    return head.next;
+}
 
 
 
@@ -91,27 +119,28 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    char *p = argv[1];
+    // トークナイズする
+    token = tokenize(argv[1]);
+
+    //　アセンブリの前半部分を出力
+    // char *p = argv[1];
 
     printf(".intel_syntax noprefix\n");
     printf(".globl main\n");
     printf("main:\n");
-    printf("  mov rax, %ld\n", strtol(p, &p, 10));
 
-    while (*p) {
-        if (*p == '+') {
-        p++;
-        printf("  add rax, %ld\n", strtol(p, &p, 10));
-        continue;
-    }
+    // 式の最初は数でなければならないので、それをチェックして
+    // 最初のmov命令を出力
+    printf("  mov rax, %d\n", expect_number());
 
-    if (*p == '-') {
-        p++;
-        printf("  sub rax, %ld\n", strtol(p, &p, 10));
-        continue;
-    }
-    fprintf(stderr, "Unexpected char: '%c'\n", *p);
-    return 1;
+
+    while (!at_eof()){
+        if (consume('+')){
+            printf("  add rax, %d\n", expect_number());
+            continue;
+        }
+        expect('-');
+        printf("  sub rax, %d\n", expect_number());
     }
 
     printf("  ret\n");
