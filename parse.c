@@ -5,7 +5,6 @@ char *user_input;
 // 現在着目しているトークン
 Token *token;
 
-
 void error_at(char *loc, char *fmt, ...){
     va_list ap;
     va_start(ap, fmt);
@@ -13,6 +12,14 @@ void error_at(char *loc, char *fmt, ...){
     fprintf(stderr, "%s\n", user_input);
     fprintf(stderr, "%*s", pos, ""); // print pos spaces.
     fprintf(stderr, "^ ");
+    vfprintf(stderr, fmt, ap);
+    fprintf(stderr, "\n");
+    exit(1);
+}
+
+void error(char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
     vfprintf(stderr, fmt, ap);
     fprintf(stderr, "\n");
     exit(1);
@@ -29,6 +36,28 @@ bool consume(char *op){
     token = token->next;
     return true;
 }
+
+/*
+Token *consume_ident(){
+    if (token->kind != TK_IDENT ||
+        strlen(tok) != token -> len ||
+        memcmp(token->str, tok, token->len)){
+            return NULL;
+        }
+    token = token->next;
+    return token;
+}
+*/
+Token* consume_ident() {
+  if (token->kind != TK_IDENT) {
+    return NULL;
+  }
+  Token* tok = token;
+  token = token->next;
+  return tok;
+}
+
+
 
 void expect(char *op){
     if (token->kind != TK_RESERVED ||
@@ -89,7 +118,7 @@ Token *tokenize(){
                 continue;
             }
 
-        if (strchr("+-*/()<>", *p)){// char *strchr(const char *s, int c); 
+        if (strchr("+-*/()<>=;", *p)){// char *strchr(const char *s, int c); 
             // 文字列sのなかで最初のcharにcastされたcが見つかった位置を返す
             // なかったらNULLを返す
 
@@ -100,6 +129,11 @@ Token *tokenize(){
             と同じ. 後方で++するやつらしい...
             だから, ここでは文字を入れて、次の数字のところにポインタを一つ進めている.
             */
+            continue;
+        }
+
+        if ('a' <= *p && *p <= 'z'){ // ""を使うとtokenizeしてくれない...
+            cur = new_token(TK_IDENT, cur, p++, 1);
             continue;
         }
 
