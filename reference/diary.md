@@ -187,6 +187,68 @@ long strtol(const char *s, char **endptr, int base);
 
 参考: https://daeudaeu.com/arrow/
 
+
+- ### 構造体
+
+```C
+struct　point {
+  int x;
+  int y;
+}; // 構造体の宣言
+struct point a; // 構造体変数を宣言
+```
+
+`point`を構造体タグ名, `a`は構造体変数である.
+構造体変数を宣言することで, `a.x`のようにメンバにアクセスできるようになる.
+
+これは
+
+```C
+struct　point {
+  int x;
+  int y;
+} a;
+```
+と言う風にまとめることができる.
+
+
+- #### typedef
+typedef文を使って構造体を自作の型として定義できる.
+
+`typedef char * STRIGN;`
+
+とすると, 
+
+`STRING s1 = "hoge";`と言う風にできる.
+
+
+- ### enum(型列挙)
+
+入力された文字列の種類を表すために列挙型を使う.
+
+```C
+typedef enum {
+    TK_RESERVED,
+    TK_NUM,
+    TK_EOF,
+    TK_RESERVED, // 記号
+    TK_NUM,  // 整数トークン
+    TK_EOF, // 入力の終わりを表すトークン
+} Tokenkind;
+
+typedef struct Token Token;
+
+struct Token{
+    Tokenkind kind; // トークンの型
+    Token *next;   // 次の入力トークン
+    int val;       // kindがTK_NUMの場合, その数値
+    char *str;     // トークン文字列
+};
+```
+
+構造体`Token`のメンバ`kind`の型は, 列挙型(構造体変数名: `Tokenkind`)である.
+
+
 ## Day3
 [ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
 
@@ -199,12 +261,14 @@ long strtol(const char *s, char **endptr, int base);
 
 ## Day5
 [ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+
 [ - github/pluswing/c_compiler]()
 
 
 ## Day6
 
 [ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+
 [ - github/pluswing/c_compiler]()
 
 
