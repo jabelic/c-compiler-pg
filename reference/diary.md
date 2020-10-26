@@ -164,7 +164,7 @@ int main(){
 #include <stdlib.h>
 long strtol(const char *s, char **endptr, int base);
 ```
-`s`が数字ならその数字を`base`進数でlon型に変換して値を返す. そうでないならその文字列`p`のポインタを`**endptr`に格納し, `0`を返す.
+`s`が数字ならその数字を`base`進数でlon型に変換して値を返す. そうでないならその文字列`s`のポインタを`**endptr`に格納し, `0`を返す.
 
 
 
