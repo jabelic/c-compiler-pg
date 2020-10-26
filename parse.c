@@ -57,8 +57,6 @@ Token* consume_ident() {
   return tok;
 }
 
-
-
 void expect(char *op){
     if (token->kind != TK_RESERVED ||
         strlen(op) != token -> len ||
@@ -92,8 +90,6 @@ Token *new_token(Tokenkind kind, Token *cur, char *str, int len){
     cur->next = tok;
     return tok;
 }
-
-
 
 bool startswith(char *p, char *q){
     return memcmp(p, q, strlen(q)) == 0;
@@ -140,7 +136,8 @@ Token *tokenize(){
         if (isdigit(*p)){
             cur = new_token(TK_NUM, cur, p, 0);
             char *q = p;
-            cur->val = strtol(p, &p, 10); // pの先頭が数字ならn(今は10)進法でlong型に変換して文字のポインタを&pに格納
+            cur->val = strtol(p, &p, 10); // pが数字ならn(今は10)進法でlong型に変換して返す.
+                                        // 数として認識できない文字に行き当たると
             cur->len = p - q;
             continue;
         }
