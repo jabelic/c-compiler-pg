@@ -61,7 +61,7 @@ services:
 
 [#02 first implements and test - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/tree/9d4d97bd5c249e524ab5c3b3f1d81e1fb9c52149)
 
-### コマンドライン引数
+- ### コマンドライン引数
 
 ```c
 int main(int argc, char **argv){
@@ -83,14 +83,14 @@ argv[2]="abc";
 
 である.
 
-### atoi
+- ### atoi
 
 関数形式のマクロ. 
 
 `printf("  mov rax, %d\n", atoi(argv[1]));// atoi: 文字をint型に変換`
 
 
-### ファイルへの権限の設定
+- ### ファイルへの権限の設定
 
 `$ ./test.sh`
 
@@ -108,7 +108,7 @@ argv[2]="abc";
 
 - 参考: [Linuxの権限確認と変更(chmod)（超初心者向け） - Qiita](https://qiita.com/shisama/items/5f4c4fa768642aad9e06)
 
-### ccコンパイラでアセンブラを実行形式に
+- ### ccコンパイラでアセンブラを実行形式に
 
 CCコンパイラはアセンブルを実行形式に変えることもできる。
 
@@ -136,7 +136,7 @@ CCコンパイラはアセンブルを実行形式に変えることもできる
 
 [#03 makefile, add, sub - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/tree/5bece5ac01d7fbc84985e6f0df5fdafa7df3f3b6)
 
-### strtol
+- ### strtol
 
 関数形式のマクロ. 
 
