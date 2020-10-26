@@ -90,7 +90,7 @@ argv[2]="abc";
 `printf("  mov rax, %d\n", atoi(argv[1]));// atoi: 文字をint型に変換`
 
 
-- ### ファイルへの権限の設定
+- ### ファイルの権限の設定
 
 `$ ./test.sh`
 
