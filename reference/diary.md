@@ -173,8 +173,19 @@ long strtol(const char *s, char **endptr, int base);
 
 [#04 tokenizer - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/tree/cd213d0d2820475796a0048e50bdaabc77124d7b)
 
+- ### Arror演算子
 
+`token->kind`
 
+アロー演算子「->」は「*」と「.」を一つにまとめた演算子. 構造体のメンバをアクセスしている.
+
+左側はpointer変数, 右側は構造体のメンバ.
+
+アロー演算子とは、ポインタから構造体のメンバへアクセスするための演算子
+
+`(*構造体ポインタ型変数).メンバ名 = 構造体ポインタ型変数->メンバ名`
+
+参考: https://daeudaeu.com/arrow/
 
 ## Day3
 [ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
