@@ -373,9 +373,12 @@ primary    = num | "(" expr ")"
 
 ## Part7
 
-[ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+[ステップ9：1文字のローカル変数 - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9791%E6%96%87%E5%AD%97%E3%81%AE%E3%83%AD%E3%83%BC%E3%82%AB%E3%83%AB%E5%A4%89%E6%95%B0)
 
-[ - github/pluswing/c_compiler]()
+[#18 variable 04 - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/tree/6b6e425284689618a4d91efb2d85d29922211ce2)
+
+
+文を`;`で区切ってコンパイルさせることができるようになった.
 
 
 
