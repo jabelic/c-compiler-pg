@@ -23,7 +23,7 @@ Ubuntu 20.04.1 LTS \n \l
 
 
 
-## Day1
+## Part1
 
 `$ mkdir c-compiler && cd c-compiler`
 
@@ -168,7 +168,7 @@ long strtol(const char *s, char **endptr, int base);
 
 
 
-## Day2
+## Part2
 [ステップ3：トークナイザを導入 - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%973%E3%83%88%E3%83%BC%E3%82%AF%E3%83%8A%E3%82%A4%E3%82%B6%E3%82%92%E5%B0%8E%E5%85%A5)
 
 [#04 tokenizer - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/tree/cd213d0d2820475796a0048e50bdaabc77124d7b)
@@ -312,53 +312,75 @@ void error(char *fmt, ...){
   - streamには`stdout`か`stderr`を指定する.
 
 
-## Day3
+## Part3
+[ステップ4：エラーメッセージを改良 - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%974%E3%82%A8%E3%83%A9%E3%83%BC%E3%83%A1%E3%83%83%E3%82%BB%E3%83%BC%E3%82%B8%E3%82%92%E6%94%B9%E8%89%AF)
+
+[#06 error_at - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/commit/bb37f9fe273ee377f61ab4388111e7cf07e5897f)
+
+- 配列は線形に取るので, 該当の文字のアドレスから先頭のアドレスを引けば必要な空白文字の数を知ることができる, と言う性質を使ってエラー箇所を指摘するerror関数を実装.
+
+## Part4
+[文法の記述方法と再帰下降構文解析 - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E6%96%87%E6%B3%95%E3%81%AE%E8%A8%98%E8%BF%B0%E6%96%B9%E6%B3%95%E3%81%A8%E5%86%8D%E5%B8%B0%E4%B8%8B%E9%99%8D%E6%A7%8B%E6%96%87%E8%A7%A3%E6%9E%90)
+
+[ステップ5：四則演算のできる言語の作成 - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%975%E5%9B%9B%E5%89%87%E6%BC%94%E7%AE%97%E3%81%AE%E3%81%A7%E3%81%8D%E3%82%8B%E8%A8%80%E8%AA%9E%E3%81%AE%E4%BD%9C%E6%88%90)
+
+[ステップ6：単項プラスと単項マイナス - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%976%E5%8D%98%E9%A0%85%E3%83%97%E3%83%A9%E3%82%B9%E3%81%A8%E5%8D%98%E9%A0%85%E3%83%9E%E3%82%A4%E3%83%8A%E3%82%B9)
+
+[#08 tree to code - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/tree/70d15375940c4d43ce2e83d908a583cec870e22b)
+
+再起下降構文解析
+```
+expr    = mul ("+" mul | "-" mul)*
+mul     = primary ("*" primary | "/" primary)*
+primary = num | "(" expr ")"
+```
+
+`user_input`をglobal変数として宣言しているので, 引数で取らなくても参照できるようにしている. 
+
+
+## Part5
+
+[ステップ7: 比較演算子 - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%977-%E6%AF%94%E8%BC%83%E6%BC%94%E7%AE%97%E5%AD%90)
+
+[#11 compare expression (tokenize) - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/commit/9f9f6b0d85cd3254bc9c0dccc464118aba66b352)
+
+比較演算子は二文字なので, 演算子の文字数を表す項を構造体(Token)のメンバに追加.
+
+
+```
+expr       = equality
+equality   = relational ("==" relational | "!=" relational)*
+relational = add ("<" add | "<=" add | ">" add | ">=" add)*
+add        = mul ("+" mul | "-" mul)*
+mul        = unary ("*" unary | "/" unary)*
+unary      = ("+" | "-")? primary
+primary    = num | "(" expr ")"
+```
+
+## Part6
+
+[分割コンパイルとリンク - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E5%88%86%E5%89%B2%E3%82%B3%E3%83%B3%E3%83%91%E3%82%A4%E3%83%AB%E3%81%A8%E3%83%AA%E3%83%B3%E3%82%AF)
+
+[#13 code division - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/commit/0daade15023146c48508d0a7069b28a3d2b9daba)
+
+
+[ステップ8: ファイル分割とMakefileの変更 - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%978-%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E5%88%86%E5%89%B2%E3%81%A8makefile%E3%81%AE%E5%A4%89%E6%9B%B4)
+
+[#14 code division and update makefile - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/tree/a4ad44da31a78c005d3a3140245d3f73a0abb5e7)
+
+
+
+
+## Part7
+
 [ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
 
 [ - github/pluswing/c_compiler]()
 
-## Day4
-[ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
-
-[ - github/pluswing/c_compiler]()
-
-## Day5
-[ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
-
-[ - github/pluswing/c_compiler]()
-
-
-## Day6
-
-[ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
-
-[ - github/pluswing/c_compiler]()
-
-
-## Day7
-
-[ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
-
-[ - github/pluswing/c_compiler]()
 
 
 
 
-
-
-
-
-
-### 文字列, 配列
-
-`char *p = "hoge"`と`char p[] = "hoge"`は同じ意味.
-
-
-## マクロ
-
-関数形式
-
-### atoi
 
 
 
