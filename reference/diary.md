@@ -222,6 +222,17 @@ typedef文を使って構造体を自作の型として定義できる.
 `STRING s1 = "hoge";`と言う風にできる.
 
 
+```C
+typedef struct point {
+  int x;
+  int y;
+} Point;
+```
+とすると, 
+
+`Point b`とすることで構造体変数を宣言することができる.
+
+
 - ### enum(型列挙)
 
 入力された文字列の種類を表すために列挙型を使う.
@@ -247,6 +258,58 @@ struct Token{
 ```
 
 構造体`Token`のメンバ`kind`の型は, 列挙型(構造体変数名: `Tokenkind`)である.
+
+
+- ### calloc
+```c
+#include <stdlib.h>
+void *calloc(size_t n, size_t size);
+```
+[http://www9.plala.or.jp/sgwr-t/lib/calloc.html]
+メモリを確保
+
+>ヒープメモリから size バイトのブロックを n個割り当てます。確保されたブロックは 0 クリアされます。
+
+- ### isdigit
+
+`isdigit()`
+
+10進数であるかどうか
+
+
+- ### error報告関数
+要はprintfを独自実装している
+
+```c
+void error(char *fmt, ...){
+    va_list ap;
+    va_start(ap, fmt);
+    vfprintf(stderr, fmt, ap);
+    fprintf(stderr, "\n");
+    exit(1);
+}
+```
+
+- 可変長引数をとる関数にしていて, fmtは文字列.
+- `va_list`
+  - `typedef char *va_list`
+  - char型のポインタ `ap`を宣言.
+- `va_start`
+  - 可変な部分の直前に置かれる引数の名前をとる. つまり関数が肩を認識している最後のパラメータ. ここでは`fmt`.
+  - `ap`に各引数のポインタを格納している.
+- `vfprintf`
+  - apに格納されたアドレスを辿って, fmtの変換書式文字列で指定された書式を適用して当てはめた文字列が`stderr`に格納される 
+  
+  ```c
+  #include <stdio.h>
+  #include <stdarg.h>
+  int vfprintf(
+    FILE * restrict stream,
+    const char * restrict format,
+    va_list arg
+  );
+  ```
+  - streamには`stdout`か`stderr`を指定する.
 
 
 ## Day3
