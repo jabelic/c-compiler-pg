@@ -146,9 +146,25 @@ Node *primary(){
     }
     Token *tok = consume_ident();
     if (tok){
-        Node *node = calloc(1, sizeof(Node));
+        Node *node = calloc(1, sizeof(Node));//未定義の変数の分のメモリを確保
         node->kind = ND_LVAR;
-        node->offset = (tok->str[0] - 'a' + 1) * 8;
+        LVar *lvar = find_lvar(tok);
+        if(lvar){
+            node->offset = lvar->offset;
+        }else{
+            lvar = calloc(1, sizeof(LVar));
+            lvar->next = locals;
+            lvar->name = tok->str;
+            lvar->len = tok->len;
+            if (locals == NULL){
+                lvar->offset = 8;
+            }else{
+                lvar->offset = locals->offset + 8;
+            }
+            node->offset = lvar->offset;
+            locals = lvar;
+        }
+        //node->offset = (tok->str[0] - 'a' + 1) * 8;
         return node;
     }
     // そうでなければ数値のはず

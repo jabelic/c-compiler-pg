@@ -382,11 +382,33 @@ primary    = num | "(" expr ")"
 
 
 
+## Part8
+
+[ステップ10：複数文字のローカル変数 - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9710%E8%A4%87%E6%95%B0%E6%96%87%E5%AD%97%E3%81%AE%E3%83%AD%E3%83%BC%E3%82%AB%E3%83%AB%E5%A4%89%E6%95%B0)
+
+[#19 multiple char variable 01 - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/tree/885b35c690c165f3080fa96831383d9e15f3ff36)
 
 
 
+`memcmp(tok->str, var->name, var->len)`は一致していれば0が返ってくるので, `!`でひっくり返してあげないとTRUEとして認識されない.
 
+- tokenize
+  - 入力文字列を構造体(Token)を用いて連結リストにする.
+- generater
+  - BNFで構文木生成
+    - 文字であれば, スタック文字データ分進ませる. 
+  - アセンブラのコードを出力
 
+## Part9
 
+[- 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+
+[- github/pluswing/c_compiler]()
+
+## Part10
+
+[- 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+
+[- github/pluswing/c_compiler]()
 
 

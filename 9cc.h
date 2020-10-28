@@ -28,10 +28,22 @@ struct Token{
 };
 // linked listを書いている??
 
+typedef struct LVar LVar;
+
+struct LVar {
+    LVar *next;
+    char *name;
+    int len;
+    int offset;
+};
+
+
 extern char *user_input;
 
 // 現在着目しているトークン
 extern Token *token;
+
+extern LVar *locals;
 
 
 void error(char *fmt,...);
@@ -44,7 +56,7 @@ bool at_eof();
 Token *new_token(Tokenkind kind, Token *cur, char *str, int len);
 bool startswith(char *p, char *q);
 Token *tokenize();
-
+LVar *find_lvar(Token *tok);
 
 typedef enum{
     ND_ADD, // +

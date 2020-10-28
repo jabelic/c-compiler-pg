@@ -5,6 +5,9 @@ char *user_input;
 // 現在着目しているトークン
 Token *token;
 
+// 複数文字のlocal変数
+LVar *locals;
+
 void error_at(char *loc, char *fmt, ...){
     va_list ap;
     va_start(ap, fmt);
@@ -48,11 +51,11 @@ Token *consume_ident(){
     return token;
 }
 */
-Token* consume_ident() {
+Token *consume_ident() {
   if (token->kind != TK_IDENT) {
     return NULL;
   }
-  Token* tok = token;
+  Token *tok = token;
   token = token->next;
   return tok;
 }
@@ -95,6 +98,7 @@ bool startswith(char *p, char *q){
     return memcmp(p, q, strlen(q)) == 0;
 }
 
+
 Token *tokenize(){
     char *p = user_input;
     Token head;
@@ -129,9 +133,17 @@ Token *tokenize(){
         }
 
         if ('a' <= *p && *p <= 'z'){ // ""を使うとtokenizeしてくれない...
-            cur = new_token(TK_IDENT, cur, p++, 1);
+            char *c = p;
+            while('a' <= *c && *c <= 'z'){
+                c++;
+            }
+            int len = c - p;
+            //fprintf(stderr, "debug  %s, %d\n", p, len);
+            cur = new_token(TK_IDENT, cur, p, len);
+            p = c;
             continue;
         }
+        
 
         if (isdigit(*p)){
             cur = new_token(TK_NUM, cur, p, 0);
@@ -146,4 +158,13 @@ Token *tokenize(){
     }
     new_token(TK_EOF, cur, p, 0);
     return head.next;
+}
+
+LVar *find_lvar(Token *tok){
+    for (LVar *var = locals; var; var = var->next){
+        if (var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
+            return var;
+        }
+    }
+    return NULL;
 }
