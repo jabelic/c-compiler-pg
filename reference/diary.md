@@ -389,7 +389,6 @@ primary    = num | "(" expr ")"
 [#19 multiple char variable 01 - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/tree/885b35c690c165f3080fa96831383d9e15f3ff36)
 
 
-
 `memcmp(tok->str, var->name, var->len)`は一致していれば0が返ってくるので, `!`でひっくり返してあげないとTRUEとして認識されない.
 
 - tokenize
@@ -399,21 +398,25 @@ primary    = num | "(" expr ")"
   - `Token head`を宣言, そのアドレスを`cur`にコピー.
   - `cur`を`new_token`に渡して, `cur.next`に`new_token`内で新しく宣言した`Token *tok`のアドレスを格納する.
     - `Token *tok`には`p`の現在の文字の情報が格納される.
-  - `cur`が`new_token`の返した`tok`を受け取るので, 登録したトークンを`cur`が逐一参照している事になる. 
-    - `cur`はすでに登録が終わったトークンの位置にいると言うこと.
-
-
+  - `cur`が`new_token`の返した`tok`を受け取るので, 最後に登録したトークンを`cur`が逐一参照している事になる. 
 
 - generater
   - BNFで構文木生成
     - 文字であれば, スタック文字データ分進ませる. 型はLVar.
-  - アセンブラのコードを出力
+  - BNFを辿って, アセンブラのコードを出力
 
 ## Part9
 
-[- 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+[ステップ11：return文 - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9711return%E6%96%87)
 
-[- github/pluswing/c_compiler]()
+[#20 multiple char variable 02, return syntax - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/tree/87b344479270a58f5ccab88e50c04c2161621e7e)
+
+
+reference branchのコミットログ[rui314/chibicc](https://github.com/rui314/chibicc/commits/reference?after=ce61154cf542e630bc3e40262fdacdf20bf91b90+69&branch=reference)
+- これで良いのかな. 
+- main branchはだいぶ違う感じだったので...
+
+
 
 ## Part10
 

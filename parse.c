@@ -61,6 +61,15 @@ Token *consume_ident() {
   return tok;
 }
 
+Token *consume_return() {
+  if (token->kind != TK_RETURN) {
+    return NULL;
+  }
+  Token *tok = token;
+  token = token->next;
+  return tok;
+}
+
 void expect(char *op){
     if (token->kind != TK_RESERVED ||
         strlen(op) != token -> len ||
@@ -99,6 +108,16 @@ bool startswith(char *p, char *q){
     return memcmp(p, q, strlen(q)) == 0;
 }
 
+// 英数字 or _　であるかどうかを判定.
+int is_alnum(char c){
+    return ('a' <= c && c <= 'z') || 
+            ('a' <= c && c <= 'z') ||
+            ('a' <= c && c <= 'z') ||
+            (c == '_');
+}
+
+
+
 // 入力されたコード列から連結リストを作成. BNFへの準備.
 Token *tokenize(){ 
     char *p = user_input;
@@ -118,6 +137,15 @@ Token *tokenize(){
                 p += 2;
                 continue;
             }
+
+        if (startswith(p, "return") && !is_alnum(p[6])){
+            cur = new_token(TK_RETURN, cur, p, 6);
+            //tokens[i].ty = TK_RETURN;
+            //tokens[i].str = p;
+            //i++;
+            p += 6;
+            continue;
+        }
 
         if (strchr("+-*/()<>=;", *p)){// char *strchr(const char *s, int c); 
             // 文字列sのなかで最初のcharにcastされたcが見つかった位置を返す
@@ -168,3 +196,4 @@ LVar *find_lvar(Token *tok){
     }
     return NULL;
 }
+
