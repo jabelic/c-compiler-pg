@@ -51,6 +51,7 @@ Token *consume_ident(){
     return token;
 }
 */
+
 Token *consume_ident() {
   if (token->kind != TK_IDENT) {
     return NULL;
@@ -98,8 +99,8 @@ bool startswith(char *p, char *q){
     return memcmp(p, q, strlen(q)) == 0;
 }
 
-
-Token *tokenize(){
+// 入力されたコード列から連結リストを作成. BNFへの準備.
+Token *tokenize(){ 
     char *p = user_input;
     Token head;
     head.next = NULL;
@@ -144,12 +145,11 @@ Token *tokenize(){
             continue;
         }
         
-
         if (isdigit(*p)){
             cur = new_token(TK_NUM, cur, p, 0);
             char *q = p;
             cur->val = strtol(p, &p, 10); // pが数字ならn(今は10)進法でlong型に変換して返す.
-                                        // 数として認識できない文字に行き当たると
+                                        // 数として認識できない文字に行き当たるとpにその文字のポインタを格納.
             cur->len = p - q;
             continue;
         }
@@ -161,7 +161,7 @@ Token *tokenize(){
 }
 
 LVar *find_lvar(Token *tok){
-    for (LVar *var = locals; var; var = var->next){
+    for (LVar *var = locals; var; var = var->next){ // 全ての変数名を参照してその変数名が使われているかどうか確認.
         if (var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
             return var;
         }
