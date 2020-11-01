@@ -401,9 +401,9 @@ primary    = num | "(" expr ")"
   - `cur`が`new_token`の返した`tok`を受け取るので, 最後に登録したトークンを`cur`が逐一参照している事になる. 
 
 - generater
-  - BNFで構文木生成
+  - 再帰下降構文木を生成
     - 文字であれば, スタック文字データ分進ませる. 型はLVar.
-  - BNFを辿って, アセンブラのコードを出力
+  - 再帰下降構文木を辿って, アセンブラのコードを出力
 
 ## Part9
 
@@ -417,10 +417,29 @@ reference branchのコミットログ[rui314/chibicc](https://github.com/rui314/
 
 [pluswing/c_compiler](https://github.com/pluswing/c_compiler/tree/master)
 - こっちに合わせた方が良いかもと言う気持ちになってきた
-- 現在
+
+pop命令
+- スタック領域からレジスタ領域にデータを持ってくる
+
 
 
 ## Part10
+
+[ステップ12: 制御構文を足す - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9712-%E5%88%B6%E5%BE%A1%E6%A7%8B%E6%96%87%E3%82%92%E8%B6%B3%E3%81%99)
+
+[#22 if syntax - github/pluswing/c_compiler](chrome-extension://klbibkeccnjlkjkiokjodocebajanakg/suspended.html#ttl=%2322%20if%20syntax%20%C2%B7%20pluswing%2Fc_compiler%40bfc7cdc&pos=0&uri=https://github.com/pluswing/c_compiler/commit/bfc7cdc92e497353df6f9bb35e27be270798140d)
+
+
+
+## Part11
+
+[- 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+
+[- github/pluswing/c_compiler]()
+
+
+
+## Part12
 
 [- 低レイヤを知りたい人のためのCコンパイラ作成入門]()
 
