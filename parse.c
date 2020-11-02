@@ -69,6 +69,14 @@ Token *consume_return() {
   token = token->next;
   return tok;
 }
+Token *consume_if() {
+  if (token->kind != TK_IF) {
+    return NULL;
+  }
+  Token *tok = token;
+  token = token->next;
+  return tok;
+}
 
 void expect(char *op){
     if (token->kind != TK_RESERVED ||
@@ -144,6 +152,15 @@ Token *tokenize(){
             //tokens[i].str = p;
             //i++;
             p += 6;
+            continue;
+        }
+
+        if (startswith(p, "if") && !is_alnum(p[2])){
+            cur = new_token(TK_IF, cur, p, 2);
+            //tokens[i].ty = TK_RETURN;
+            //tokens[i].str = p;
+            //i++;
+            p += 2;
             continue;
         }
 

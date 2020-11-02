@@ -18,7 +18,9 @@ Node *new_node_num(int val){
 /*
 四則演算, 比較, 変数, 代入, セミコロン.
 program = stmt*
-stmt    = expr ";" | "return" expr ";"
+stmt    = expr ";" 
+        | "if" "(" expr ")" stmt 
+        | "return" expr ";"
 expr       = assign
 assign     = equality ("=" assign)?
 equality   = relational ("==" relational | "!=" relational)*
@@ -42,6 +44,16 @@ void program(){
 
 Node *stmt(){
     Node *node;
+
+    if (consume_if()){
+        expect("(");
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_IF;
+        node->lhs = expr();
+        expect(")");
+        node->rhs = stmt();
+        return node;
+    }
     if (consume_return()){
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
@@ -192,6 +204,13 @@ void gen_lval(Node *node){
 
 void gen(Node *node){
     switch (node->kind){
+    case ND_IF:
+        gen(node->lhs);
+        printf("  pop rax\n");
+        printf("  cmp rax, 0\n");
+        printf("  je  .LendXXX\n");
+        gen(node->rhs);
+        printf(".LendXXX:\n");
     case ND_RETURN:
         gen(node->lhs);
         printf("  pop rax\n");
