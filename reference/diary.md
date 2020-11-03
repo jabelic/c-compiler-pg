@@ -357,6 +357,31 @@ unary      = ("+" | "-")? primary
 primary    = num | "(" expr ")"
 ```
 
+
+```x86
+ pop rdi
+ pop rax
+ cmp rax, rdi
+ sete al
+ movzb rax, al
+```
+
+cmp
+- 比較命令
+- 結果はフラグレジスタと言うところに格納される
+- >フラグレジスタは整数演算や比較演算命令が実行されるたびに更新されるレジスタで、結果が0かどうかといったビットや、桁あふれが発生したかどうかというビット、結果が0未満かどうかといったビットなどを持っています。
+
+sete
+- フラグレジスタの特定のbitをALにコピーする. 比較演算子`==`の場合に使う. `<`ではsetl、`<=`ではsetle、`!=`ではsetneを使う.
+
+al
+- RAXの下位8ビットを表す.
+
+movzb
+- RAX全体をゼロクリアする.
+
+
+
 ## Part6
 
 [分割コンパイルとリンク - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E5%88%86%E5%89%B2%E3%82%B3%E3%83%B3%E3%83%91%E3%82%A4%E3%83%AB%E3%81%A8%E3%83%AA%E3%83%B3%E3%82%AF)
@@ -428,6 +453,10 @@ pop命令
 [ステップ12: 制御構文を足す - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9712-%E5%88%B6%E5%BE%A1%E6%A7%8B%E6%96%87%E3%82%92%E8%B6%B3%E3%81%99)
 
 [#22 if syntax - github/pluswing/c_compiler](chrome-extension://klbibkeccnjlkjkiokjodocebajanakg/suspended.html#ttl=%2322%20if%20syntax%20%C2%B7%20pluswing%2Fc_compiler%40bfc7cdc&pos=0&uri=https://github.com/pluswing/c_compiler/commit/bfc7cdc92e497353df6f9bb35e27be270798140d)
+
+
+`if (A) return B;`を実装した. まだ`else`は通らない.
+
 
 
 
