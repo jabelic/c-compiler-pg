@@ -12,6 +12,7 @@ typedef enum{
     TK_NUM,      // 整数トークン
     TK_RETURN, // return 
     TK_IF, // if
+    TK_ELSE, //else
     TK_EOF,      // 入力の終わりを表すトークン
 } Tokenkind;     //0,1,2
 //TAG名は省略している
@@ -54,6 +55,7 @@ bool consume(char *op);
 Token *consume_ident();
 Token *consume_return();
 Token *consume_if();
+Token *consume_else();
 void expect(char *op);
 int expect_number();
 bool at_eof();
@@ -84,6 +86,7 @@ struct Node{
     NodeKind kind; // ノードの型
     Node *lhs; // 左辺
     Node *rhs; // 右辺
+    Node *els; // only kind == ND_IF
     int val;   // kindがND_NUMの場合のみ使う.
     int offset; // kindがND_LVERの場合のみ使う.
 };

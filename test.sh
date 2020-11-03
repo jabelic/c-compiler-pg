@@ -64,4 +64,12 @@ assert 8 "return 8;"
 # if
 assert 3 "a = 3;
 if(a == 3) return a;"
+assert 5 "
+if(3 != 3) return 3;
+return 5;"
+assert 5 "a = 3;
+b = 5;
+if(a == 5) return a;
+else return b;"
+
 echo OK

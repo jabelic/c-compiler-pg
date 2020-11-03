@@ -77,6 +77,14 @@ Token *consume_if() {
   token = token->next;
   return tok;
 }
+Token *consume_else() {
+  if (token->kind != TK_ELSE) {
+    return NULL;
+  }
+  Token *tok = token;
+  token = token->next;
+  return tok;
+}
 
 void expect(char *op){
     if (token->kind != TK_RESERVED ||
@@ -157,12 +165,15 @@ Token *tokenize(){
 
         if (startswith(p, "if") && !is_alnum(p[2])){
             cur = new_token(TK_IF, cur, p, 2);
-            //tokens[i].ty = TK_RETURN;
-            //tokens[i].str = p;
-            //i++;
             p += 2;
             continue;
         }
+        if (startswith(p, "else") && !is_alnum(p[4])){
+            cur = new_token(TK_ELSE, cur, p, 4);
+            p += 4;
+            continue;
+        }
+
 
         if (strchr("+-*/()<>=;", *p)){// char *strchr(const char *s, int c); 
             // 文字列sのなかで最初のcharにcastされたcが見つかった位置を返す

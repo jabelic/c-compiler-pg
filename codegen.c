@@ -19,7 +19,7 @@ Node *new_node_num(int val){
 四則演算, 比較, 変数, 代入, セミコロン.
 program = stmt*
 stmt    = expr ";" 
-        | "if" "(" expr ")" stmt 
+        | "if" "(" expr ")" stmt ("else" stmt)?
         | "return" expr ";"
 expr       = assign
 assign     = equality ("=" assign)?
@@ -52,8 +52,13 @@ Node *stmt(){
         node->lhs = expr();
         expect(")");
         node->rhs = stmt();
+        node->els = NULL;
+        if (consume_else()){
+            node->els = stmt();
+        }
         return node;
     }
+
     if (consume_return()){
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
@@ -201,6 +206,19 @@ void gen_lval(Node *node){
     printf("  push rax\n");
 }
 
+/*if else
+
+ Aをコンパイルしたコード // スタックトップに結果が入っているはず
+  pop rax
+  cmp rax, 0
+  je  .LelseXXX
+  Bをコンパイルしたコード
+  jmp .LendXXX
+.LelseXXX
+  Cをコンパイルしたコード
+.LendXXX
+*/
+
 
 void gen(Node *node){
     switch (node->kind){
@@ -208,9 +226,15 @@ void gen(Node *node){
         gen(node->lhs);
         printf("  pop rax\n");
         printf("  cmp rax, 0\n");
-        printf("  je  .LendXXX\n");
+        printf("  je .LelseXXX\n");
         gen(node->rhs);
+        printf("  jmp .LendXXX\n");
+        printf(".LelseXXX:\n");
+        if (node->els) {
+            gen(node->els);
+        }
         printf(".LendXXX:\n");
+        return;
     case ND_RETURN:
         gen(node->lhs);
         printf("  pop rax\n");
