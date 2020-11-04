@@ -78,6 +78,7 @@ typedef enum{
     ND_NUM, // 整数
     ND_RETURN, // return
     ND_IF, // if
+    ND_ELSE, // else
 } NodeKind;
 
 typedef struct Node Node;
@@ -86,7 +87,6 @@ struct Node{
     NodeKind kind; // ノードの型
     Node *lhs; // 左辺
     Node *rhs; // 右辺
-    Node *els; // only kind == ND_IF
     int val;   // kindがND_NUMの場合のみ使う.
     int offset; // kindがND_LVERの場合のみ使う.
 };

@@ -52,9 +52,12 @@ Node *stmt(){
         node->lhs = expr();
         expect(")");
         node->rhs = stmt();
-        node->els = NULL;
         if (consume_else()){
-            node->els = stmt();
+            Node *els = calloc(1, sizeof(Node));
+            els->kind = ND_ELSE;
+            els->lhs = node->rhs; // これで枝を1本にすることができる?
+            els->rhs = stmt();
+            node->rhs = els;
         }
         return node;
     }
@@ -230,8 +233,8 @@ void gen(Node *node){
         gen(node->rhs);
         printf("  jmp .LendXXX\n");
         printf(".LelseXXX:\n");
-        if (node->els) {
-            gen(node->els);
+        if (node->rhs->kind == ND_ELSE) {
+            gen(node->rhs->rhs);
         }
         printf(".LendXXX:\n");
         return;
