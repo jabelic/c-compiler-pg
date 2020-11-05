@@ -52,8 +52,8 @@ Token *consume_ident(){
 }
 */
 
-Token *consume_ident() {
-  if (token->kind != TK_IDENT) {
+Token *consume_kind(Tokenkind kind) {
+  if (token->kind != kind) {
     return NULL;
   }
   Token *tok = token;
@@ -61,30 +61,6 @@ Token *consume_ident() {
   return tok;
 }
 
-Token *consume_return() {
-  if (token->kind != TK_RETURN) {
-    return NULL;
-  }
-  Token *tok = token;
-  token = token->next;
-  return tok;
-}
-Token *consume_if() {
-  if (token->kind != TK_IF) {
-    return NULL;
-  }
-  Token *tok = token;
-  token = token->next;
-  return tok;
-}
-Token *consume_else() {
-  if (token->kind != TK_ELSE) {
-    return NULL;
-  }
-  Token *tok = token;
-  token = token->next;
-  return tok;
-}
 
 void expect(char *op){
     if (token->kind != TK_RESERVED ||

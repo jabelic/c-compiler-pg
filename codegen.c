@@ -45,14 +45,14 @@ void program(){
 Node *stmt(){
     Node *node;
 
-    if (consume_if()){
+    if (consume_kind(TK_IF)){
         expect("(");
         node = calloc(1, sizeof(Node));
         node->kind = ND_IF;
         node->lhs = expr();
         expect(")");
         node->rhs = stmt();
-        if (consume_else()){
+        if (consume_kind(TK_ELSE)){
             Node *els = calloc(1, sizeof(Node));
             els->kind = ND_ELSE;
             els->lhs = node->rhs; // これで枝を1本にすることができる?
@@ -62,7 +62,7 @@ Node *stmt(){
         return node;
     }
 
-    if (consume_return()){
+    if (consume_kind(TK_RETURN)){
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->lhs = expr();
@@ -171,7 +171,7 @@ Node *primary(){
         expect(")");
         return node;
     }
-    Token *tok = consume_ident();
+    Token *tok = consume_kind(TK_IDENT);
     if (tok){
         Node *node = calloc(1, sizeof(Node));//未定義の変数の分のメモリを確保
         node->kind = ND_LVAR;
