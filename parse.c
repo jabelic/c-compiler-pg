@@ -149,6 +149,11 @@ Token *tokenize(){
             p += 4;
             continue;
         }
+        if (startswith(p, "while") && !is_alnum(p[5])){
+            cur = new_token(TK_WHILE, cur, p, 5);
+            p += 5;
+            continue;
+        }
 
 
         if (strchr("+-*/()<>=;", *p)){// char *strchr(const char *s, int c); 

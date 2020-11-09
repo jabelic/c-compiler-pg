@@ -20,6 +20,7 @@ Node *new_node_num(int val){
 program = stmt*
 stmt    = expr ";" 
         | "if" "(" expr ")" stmt ("else" stmt)?
+        | "while" "(" expr ")" stmt
         | "return" expr ";"
 expr       = assign
 assign     = equality ("=" assign)?
@@ -45,6 +46,15 @@ void program(){
 Node *stmt(){
     Node *node;
 
+    if (consume_kind(TK_WHILE)){
+        expect("(");
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_WHILE;
+        node->lhs = expr();
+        expect(")");
+        node->rhs = stmt();
+        return node;
+    }
     if (consume_kind(TK_IF)){
         expect("(");
         node = calloc(1, sizeof(Node));
@@ -225,6 +235,15 @@ void gen_lval(Node *node){
 
 void gen(Node *node){
     switch (node->kind){
+    case ND_WHILE:
+        printf(".LbeginXXW:\n");
+        gen(node->lhs);
+        printf("  pop rax\n");
+        printf("  cmp rax, 0\n");
+        printf("  je .LendXXW\n");
+        gen(node->rhs);
+        printf("  jmp .LbeginXXW\n");
+        printf(".LendXXW:\n");
     case ND_IF:
         gen(node->lhs);
         printf("  pop rax\n");

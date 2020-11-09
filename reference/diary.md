@@ -462,9 +462,9 @@ pop命令
 
 ## Part11
 
-[- 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+[ステップ12: 制御構文を足す - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9712-%E5%88%B6%E5%BE%A1%E6%A7%8B%E6%96%87%E3%82%92%E8%B6%B3%E3%81%99)
 
-[- github/pluswing/c_compiler]()
+[#24 refactor else - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/commit/7f23a743863ea66bed6efff5879af89ffaa890e1)
 
 
 

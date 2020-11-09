@@ -72,4 +72,8 @@ b = 5;
 if(a == 5) return a;
 else return b;"
 
+assert 11 "i = 0;
+while (i <= 10) i = i + 1;
+return i;"
+
 echo OK
