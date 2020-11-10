@@ -108,6 +108,19 @@ int is_alnum(char c){
             (c == '_');
 }
 
+typedef struct ReservedWord ReservedWord;
+struct ReservedWord {
+    char *word;
+    Tokenkind kind;
+};
+
+ReservedWord reservedWords[] = {
+    {"return", TK_RETURN},
+    {"if", TK_IF},
+    {"else", TK_ELSE},
+    {"while", TK_WHILE},
+    {"", TK_EOF},
+};
 
 
 // 入力されたコード列から連結リストを作成. BNFへの準備.
@@ -130,7 +143,23 @@ Token *tokenize(){
                 continue;
             }
 
-        if (startswith(p, "return") && !is_alnum(p[6])){
+        bool found = false;
+        for(int i = 0; reservedWords[i].kind != TK_EOF; i++){
+            char *wrd = reservedWords[i].word;
+            int len = strlen(wrd);
+            Tokenkind kind = reservedWords[i].kind;
+            if (startswith(p, wrd) && !is_alnum(p[len])){
+                cur = new_token(kind, cur, p, len);
+                p += len;
+                found = true;
+                break;
+            }
+        }
+        if (found){
+            continue;
+        }// なんでこうしないといけない？
+
+        /*if (startswith(p, "return") && !is_alnum(p[6])){
             cur = new_token(TK_RETURN, cur, p, 6);
             //tokens[i].ty = TK_RETURN;
             //tokens[i].str = p;
@@ -153,7 +182,7 @@ Token *tokenize(){
             cur = new_token(TK_WHILE, cur, p, 5);
             p += 5;
             continue;
-        }
+        }*/
 
 
         if (strchr("+-*/()<>=;", *p)){// char *strchr(const char *s, int c); 
