@@ -14,6 +14,7 @@ typedef enum{
     TK_IF, // if
     TK_ELSE, //else
     TK_WHILE, // while
+    TK_FOR, // for
     TK_EOF,      // 入力の終わりを表すトークン
 } Tokenkind;     //0,1,2
 //TAG名は省略している
@@ -78,6 +79,9 @@ typedef enum{
     ND_IF, // if
     ND_ELSE, // else
     ND_WHILE, // while
+    ND_FOR, // for
+    ND_FOR_LEFT,
+    ND_FOR_RIGHT,
 } NodeKind;
 
 typedef struct Node Node;
