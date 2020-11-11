@@ -470,8 +470,22 @@ pop命令
 
 ## Part12
 
-[- 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+[ステップ12: 制御構文を足す - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9712-%E5%88%B6%E5%BE%A1%E6%A7%8B%E6%96%87%E3%82%92%E8%B6%B3%E3%81%99)
+[#27 for syntax, label id - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/tree/9fd446547623bc9096e40028b36af5ddeb182c3d)
 
-[- github/pluswing/c_compiler]()
+
+- `if else`では`rhs`に`else`の枝を持たせることで構文木を生成している.
+- `while`
+- `for`ではトークンを先に進めて`;`があるかどうか調べながら`;`の手間のコードをコンパイルする.
+- `if`, `else`, `while`, `return`を予約語として`TK_XX`と一緒に持たせて処理を`for`で回すことで同じ処理を何度も書くことを避けた.
+
+## part13
+
+[ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+[ - github/pluswing/c_compiler]()
 
 
+## part14
+
+[ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+[ - github/pluswing/c_compiler]()
