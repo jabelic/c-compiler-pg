@@ -328,7 +328,7 @@ void error(char *fmt, ...){
 
 [#08 tree to code - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/tree/70d15375940c4d43ce2e83d908a583cec870e22b)
 
-再起下降構文解析
+再帰下降構文解析
 ```
 expr    = mul ("+" mul | "-" mul)*
 mul     = primary ("*" primary | "/" primary)*
