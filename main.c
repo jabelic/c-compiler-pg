@@ -9,6 +9,8 @@ int main(int argc, char **argv){
     // トークナイズする
     user_input = argv[1];
     token = tokenize(); //global pointer varのtokenにheadをつなげる
+    
+    // 再帰下降構文木を生成
     program();
 
 

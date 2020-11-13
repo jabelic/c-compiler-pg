@@ -19,6 +19,7 @@ Node *new_node_num(int val){
 四則演算, 比較, 変数, 代入, セミコロン.
 program = stmt*
 stmt    = expr ";" 
+        | "{" stmt* "}"
         | "if" "(" expr ")" stmt ("else" stmt)?
         | "while" "(" expr ")" stmt
         | "for" "(" expr? ";" expr? ";" expr? ")" stmt
@@ -46,6 +47,15 @@ void program(){
 
 Node *stmt(){
     Node *node;
+    if(consume("{")){
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_BLOCK;
+        node->block = calloc(100, sizeof(Node));
+        for(int i = 0; !consume("}"); i++){
+            node->block[i] = stmt();
+        }
+        return node;
+    }
 
     if (consume_kind(TK_FOR)){
         expect("(");
@@ -270,6 +280,12 @@ void gen(Node *node){
     genCounter += 1;
     int id = genCounter;
     switch (node->kind){
+    case ND_BLOCK:
+        for(int i = 0; node->block[i]; i++){
+            gen(node->block[i]);
+            printf("  pop rax\n");
+        }
+        return;
     case ND_FOR:
         gen(node->lhs->lhs);
         printf(".Lbegin%03d:\n", id);
