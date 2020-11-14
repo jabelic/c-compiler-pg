@@ -290,6 +290,9 @@ void gen(Node *node){
         gen(node->lhs->lhs);
         printf(".Lbegin%03d:\n", id);
         gen(node->lhs->rhs);
+        if (!node->lhs->rhs){ // 継続条件のところ
+            printf("  push 1\n"); // スタックに何か入れておかないと予期せぬpopをしてしまう.
+        }                         // 通常はgen(node->lhs->rhs)の結果が入ってる？
         printf("  pop rax\n");
         printf("  cmp rax, 0\n");
         printf("  je .Lend%03d\n", id);
