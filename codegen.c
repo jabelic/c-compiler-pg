@@ -31,7 +31,9 @@ relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 add        = mul ("+" mul | "-" mul)*
 mul        = unary ("*" unary | "/" unary)*
 unary      = ("+" | "-")? primary
-primary    = num | ident | "(" expr ")"
+primary    = num
+            | ident ("(" expr* ")")?
+            | "(" expr ")"
 */
 
 Node *code[100];
@@ -223,6 +225,24 @@ Node *primary(){
     }
     Token *tok = consume_kind(TK_IDENT);
     if (tok){
+        if (consume("(")){
+            // function
+            Node *node = calloc(1, sizeof(Node));
+            node->kind = ND_FUNC;
+            node->funcname = tok->str;
+            node->len = tok->len;
+            // expect(")");
+            // 引数
+            node->block = calloc(10, sizeof(Node));
+            for(int i = 0; !consume(")"); i++){
+                node->block[i] = expr();
+                if(consume(")")){
+                    break;
+                }
+                expect(",");
+            }
+            return node;
+        }
         Node *node = calloc(1, sizeof(Node));//未定義の変数の分のメモリを確保
         node->kind = ND_LVAR;
         LVar *lvar = find_lvar(tok);
@@ -247,7 +267,6 @@ Node *primary(){
     // そうでなければ数値のはず
     return new_node_num(expect_number());
 }
-
 
 
 void gen_lval(Node *node){
@@ -279,7 +298,19 @@ void gen(Node *node){
     }
     genCounter += 1;
     int id = genCounter;
+    char name[100] = {0};
+
     switch (node->kind){
+    case ND_FUNC:
+        memcpy(name, node->funcname, node->len);
+        for(int i = 0; node->block[i]; i++){
+            gen(node->block[i]);
+        }
+        //引数が二つ
+        printf("  pop rsi\n");
+        printf("  pop rdi\n");
+        printf("  call %s\n", name);
+        return;
     case ND_BLOCK:
         for(int i = 0; node->block[i]; i++){
             gen(node->block[i]);

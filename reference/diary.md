@@ -502,11 +502,33 @@ pop命令
 
 ## part14
 
-[ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
-[ - github/pluswing/c_compiler]()
+[ステップ14: 関数の呼び出しに対応する - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9714-%E9%96%A2%E6%95%B0%E3%81%AE%E5%91%BC%E3%81%B3%E5%87%BA%E3%81%97%E3%81%AB%E5%AF%BE%E5%BF%9C%E3%81%99%E3%82%8B)
+[#29 call without args - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/commit/1251ce351b725e1d858c243a6fe191403fa8cdc7)
 
+
+OKと出力する`func/func.c`を用意. 
+`func/func.c`と同じ結果になるアセンブリファイル`func/test.s`を用意.
+この二つのオブジェクトファイルをccに渡して一つの実行形式にまとめて実行.
+
+$ cc -c func.c <- オブジェクトファイルを生成
+$ cc -c test.s
+$ cc -o test test.o func.o
+$ ./test
+> OK
+> OK
+
+- nodeに関数名を持たせる枝を追加した.
+
+
+
+[#30 function call with args - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/commit/f89b6a84faf5d5baecb8e74af54f7f38d6f672bf)
 ## part15
 
-[ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
-[ - github/pluswing/c_compiler]()
+[ステップ14: 関数の呼び出しに対応する - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9714-%E9%96%A2%E6%95%B0%E3%81%AE%E5%91%BC%E3%81%B3%E5%87%BA%E3%81%97%E3%81%AB%E5%AF%BE%E5%BF%9C%E3%81%99%E3%82%8B)
+[#30 function call with args - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/commit/f89b6a84faf5d5baecb8e74af54f7f38d6f672bf)
+
+- 関数で引数を取る.
+- test.shを変えた.
+
+
 
