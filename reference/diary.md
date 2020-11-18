@@ -522,13 +522,33 @@ $ ./test
 
 
 [#30 function call with args - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/commit/f89b6a84faf5d5baecb8e74af54f7f38d6f672bf)
+
 ## part15
 
 [ステップ14: 関数の呼び出しに対応する - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9714-%E9%96%A2%E6%95%B0%E3%81%AE%E5%91%BC%E3%81%B3%E5%87%BA%E3%81%97%E3%81%AB%E5%AF%BE%E5%BF%9C%E3%81%99%E3%82%8B)
 [#30 function call with args - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/commit/f89b6a84faf5d5baecb8e74af54f7f38d6f672bf)
 
 - 関数で引数を取る.
-- test.shを変えた.
+- 引数はx86のABIで規定されている順番でレジスタにコピーして関数をcallする
+  - 第一引数から RDI, RSI, RDX, RCX.
+- func/func.c に関数`foo(3, 4)`を追加. アセンブリにも同じコードを追加.
 
+  ```asembly
+    push 3
+    push 4
+    pop rsi
+    pop rdi
+    call var  
+  ```
+
+- test.shを変えた.
+ 
+
+
+
+## part16
+
+[ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+[ - github/pluswing/c_compiler]()
 
 
