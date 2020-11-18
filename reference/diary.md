@@ -544,6 +544,7 @@ $ ./test
   ```
     mov rdi, 3
     mov rsi, 4
+    call var
   ```
   
   でも良い?
