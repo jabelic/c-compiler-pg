@@ -541,6 +541,13 @@ $ ./test
     call var  
   ```
 
+  ```
+    mov rdi, 3
+    mov rsi, 4
+  ```
+  
+  でも良い?
+
 - test.shを変えた.
  
 
