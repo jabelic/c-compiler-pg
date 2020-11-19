@@ -278,19 +278,8 @@ void gen_lval(Node *node){
     printf("  push rax\n");
 }
 
-/*if else
-
- Aをコンパイルしたコード // スタックトップに結果が入っているはず
-  pop rax
-  cmp rax, 0
-  je  .LelseXXX
-  Bをコンパイルしたコード
-  jmp .LendXXX
-.LelseXXX
-  Cをコンパイルしたコード
-.LendXXX
-*/
 int genCounter = 0;
+char *argRegs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 void gen(Node *node){
     if (!node){
@@ -303,12 +292,15 @@ void gen(Node *node){
     switch (node->kind){
     case ND_FUNC:
         memcpy(name, node->funcname, node->len);
+        int argCount = 0;
         for(int i = 0; node->block[i]; i++){
             gen(node->block[i]);
+            argCount++;
         }
-        //引数が二つ
-        printf("  pop rsi\n");
-        printf("  pop rdi\n");
+        // 引数
+        for(int i = argCount - 1; i >= 0; i--){
+            printf("  pop %s\n", argRegs[i]);
+        }
         printf("  call %s\n", name);
         return;
     case ND_BLOCK:

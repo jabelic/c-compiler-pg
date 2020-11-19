@@ -103,8 +103,8 @@ bool startswith(char *p, char *q){
 // 英数字 or _　であるかどうかを判定.
 int is_alnum(char c){
     return ('a' <= c && c <= 'z') || 
-            ('a' <= c && c <= 'z') ||
-            ('a' <= c && c <= 'z') ||
+            ('A' <= c && c <= 'Z') ||
+            ('0' <= c && c <= '9') ||
             (c == '_');
 }
 
@@ -202,7 +202,7 @@ Token *tokenize(){
 
         if ('a' <= *p && *p <= 'z'){ // ""を使うとtokenizeしてくれない...
             char *c = p;
-            while('a' <= *c && *c <= 'z'){
+            while(is_alnum(*c)){
                 c++;
             }
             int len = c - p;
