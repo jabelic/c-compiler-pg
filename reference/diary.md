@@ -556,6 +556,37 @@ $ ./test
 
 ## part16
 
+[ステップ14: 関数の呼び出しに対応する - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9714-%E9%96%A2%E6%95%B0%E3%81%AE%E5%91%BC%E3%81%B3%E5%87%BA%E3%81%97%E3%81%AB%E5%AF%BE%E5%BF%9C%E3%81%99%E3%82%8B)
+[#32 function RSP boundary - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/commit/92910a3c224312fa75ccd3afe727a602a0a20542)
+
+- 関数引数を6つまで取る
+- 7つの汎用レジスタのうち, RAX以外の6つを引数にあてがう.
+  - `char *argRegs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};`
+- X86の呼出規約ではRSPの値は16の倍数でなければならない. push, popは8バイト単位で変更するのでcallする前にRSPが16の倍数であるかどうかをチェックする必要がある.
+- スタックは下に向かって伸びる(-8). 上にRSPを移動させるにはRSP+8をする. 関数のcallの場合, 16の倍数でなければ`rsp sub, 8`する. callが終わったら元に戻す(`rsp add, 8`).
+
+
+[AMD64 ABI の特徴](https://docs.oracle.com/cd/E19253-01/819-0389/fcowb/index.html)
+
+>7 つの汎用レジスタ (%rdi、%rsi、%rdx、%rcx、%r8、%r9、%rax) は、引数をレジスタに渡す関数呼び出しシーケンスにお>ける適切な役割を定義されています。
+>2 つのレジスタ (%rsp、%rbp) はスタック管理のために使用されます。
+>2 つのレジスタ (%r10、%r11) は一時的なものです。
+>5 つのレジスタ (%r12、%r13、%r14、%r15、 %rbx) は呼び出し先保管です。
+
+>基本的な関数呼び出し規約は、AMD ABI では異なります。引数はレジスタに格納されます。単純な整数の引数の場合、最初の引数から順に %rdi、%rsi、%rdx、%rcx、%r8、%r9 レジスタに格納されます。
+
+
+
+
+## part17
+
+[ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+[ - github/pluswing/c_compiler]()
+
+
+
+## part18
+
 [ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
 [ - github/pluswing/c_compiler]()
 

@@ -108,4 +108,5 @@ assert 0 "foo();"
 assert 0 "var(3, 4);"
 assert 0 "var2(3, 4, 5);"
 
+
 echo OK

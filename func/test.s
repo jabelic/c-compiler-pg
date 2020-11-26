@@ -6,4 +6,3 @@ main:
   pop rsi
   pop rdi
   call var
-  
