@@ -563,7 +563,7 @@ $ ./test
 - 7つの汎用レジスタのうち, RAX以外の6つを引数にあてがう.
   - `char *argRegs[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};`
 - X86の呼出規約ではRSPの値は16の倍数でなければならない. push, popは8バイト単位で変更するのでcallする前にRSPが16の倍数であるかどうかをチェックする必要がある.
-- スタックは下に向かって伸びる(-8). 上にRSPを移動させるにはRSP+8をする. 関数のcallの場合, 16の倍数でなければ`rsp sub, 8`する. callが終わったら元に戻す(`rsp add, 8`).
+- スタックは下に向かって伸びる(-8). 上にRSPを移動させるにはRSP+8をする. 関数のcallの場合, 16の倍数でなければ`sub rsp, 8`する. callが終わったら元に戻す(`add rsp, 8`).
 
 
 [AMD64 ABI の特徴](https://docs.oracle.com/cd/E19253-01/819-0389/fcowb/index.html)
@@ -576,6 +576,42 @@ $ ./test
 >基本的な関数呼び出し規約は、AMD ABI では異なります。引数はレジスタに格納されます。単純な整数の引数の場合、最初の引数から順に %rdi、%rsi、%rdx、%rcx、%r8、%r9 レジスタに格納されます。
 
 
+```c
+for(int i = argCount - 1; i >= 0; i--){
+  printf("  pop %s\n", argRegs[i]);
+}
+printf("  mov rax, rsp\n");
+printf("  and rax, 15\n"); // 下位4bitをマスク. 15 := 0b00001111. 下位4bitが0であれば16の倍数.
+printf("  jnz .L.call.%03d\n", id);
+printf("  mov rax, 0\n");
+printf("  call %s\n", node->funcname);
+printf("  jmp .L.end.%03d\n", id);
+printf(".L.call.%03d:\n", id); // 計算結果が0でないとここに飛ぶ.
+printf("  sub rsp, 8\n");      // RSPを16の倍数に
+printf("  mov rax, 0\n");
+printf("  call %s\n", node->funcname);
+printf("  add rsp, 8\n");
+printf(".L.end.%03d:\n", id);
+```
+- RSPは16の倍数である必要があるので, RAX && 15することで下位4bitをマスクする.
+  - RSPが16nであれば, AND命令は0を返す. 返した値はフラグレジスタに格納される.
+  - ここではZFフラグを用いる. 計算結果が0のときに1を返し, 負の数であれば0になる.
+  - ZFフラグの状態によってジャンプするかどうかを決定する命令はJZ命令とJNZ命令がある.
+    > JZ命令は、ZFフラグがセットされている場合に、ディスティネーション・オペランドに指定された場所にジャンプします。逆にJNZ命令は、ZFフラグがセットされていない場合に、ディスティネーション・オペランドに指定された場所にジャンプします。
+  - JNZ命令はZFが0の時にジャンプする.
+  - RAXは戻り値, 引数の数を格納するので, 今は0.
+
+
+
+[フラグレジスタFR](http://www.ics.teikyo-u.ac.jp/wcasl2/tutorial/lesson01/comet08.html)
+> FR(フラグレジスタ，Flag Register)は，OF(Overflow Flag)，SF(Sign Flag)，ZF(Zero Flag)の3個のビットからなり，演算命令などの実行によって次の値が設定されます．これらの値は，条件付分岐命令で参照されます．
+> OF	算術演算命令の場合は，演算結果が-32768～32767に収まらなくなったとき1になり，それ以外のときは0になる．論理演算命令の場合は，演算結果が0～65535に収まらなくなったとき1になり，それ以外のとき0になる．
+> SF	演算結果の符号が負(ビット番号15が1)のとき1，それ以外のとき0になる．
+> ZF	演算結果がゼロ(全部のビットが0)のとき1，それ以外のとき0になる．
+> 上の図では3桁で描かれていますが，これは16進数でなく，2進数で3桁です．左からOF，SF，ZFになります．
+
+
+[インラインアセンブラで学ぶアセンブリ言語 第3回 (1/3)：CodeZine（コードジン）](https://codezine.jp/article/detail/485)
 
 
 ## part17

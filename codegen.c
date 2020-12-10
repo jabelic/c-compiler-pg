@@ -17,13 +17,14 @@ Node *new_node_num(int val){
 
 /*
 四則演算, 比較, 変数, 代入, セミコロン.
-program = stmt*
-stmt    = expr ";" 
-        | "{" stmt* "}"
-        | "if" "(" expr ")" stmt ("else" stmt)?
-        | "while" "(" expr ")" stmt
-        | "for" "(" expr? ";" expr? ";" expr? ")" stmt
-        | "return" expr ";"
+program    = func*
+func       = ident "(" ")"  "{" stmt* "}"
+stmt       = expr ";" 
+            | "{" stmt* "}"
+            | "if" "(" expr ")" stmt ("else" stmt)?
+            | "while" "(" expr ")" stmt
+            | "for" "(" expr? ";" expr? ";" expr? ")" stmt
+            | "return" expr ";"
 expr       = assign
 assign     = equality ("=" assign)?
 equality   = relational ("==" relational | "!=" relational)*
@@ -42,9 +43,30 @@ Node *code[100];
 void program(){
     int i = 0;
     while(!at_eof()){
-        code[i++] = stmt();
+        code[i++] = func();
     }
     code[i] = NULL;
+}
+
+Node *func(){
+    Node *node;
+    Token *tok = consume_kind(TK_IDENT);
+    if(tok == NULL){
+        error("This is not a function.");
+    }
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_BLOCK;
+    node->funcname = calloc(100, sizeof(char));
+    memcpy(node->funcname, tok->str, tok->len);
+    expect("(");
+    expect(")");
+    expect("{");
+    node->block = calloc(100, sizeof(Node));
+    for(int i = 0; !consume("}"); i++){
+        node->block[i] = stmt();
+    }
+    // node->lhs = stmt();
+    return node;
 }
 
 Node *stmt(){
@@ -226,11 +248,13 @@ Node *primary(){
     Token *tok = consume_kind(TK_IDENT);
     if (tok){
         if (consume("(")){
-            // function
+            // function call
             Node *node = calloc(1, sizeof(Node));
-            node->kind = ND_FUNC;
-            node->funcname = tok->str;
-            node->len = tok->len;
+            node->kind = ND_FUNC_CALL;
+            // node->funcname = tok->str;
+            node->funcname = calloc(100, sizeof(char));
+            // node->len = tok->len;
+            memcpy(node->funcname, tok->str, tok->len);
             // expect(")");
             // 引数
             node->block = calloc(10, sizeof(Node));
@@ -287,30 +311,30 @@ void gen(Node *node){
     }
     genCounter += 1;
     int id = genCounter;
-    char name[100] = {0};
+    //char name[100] = {0};
+    int argCount = 0;
 
     switch (node->kind){
-    case ND_FUNC:
-        memcpy(name, node->funcname, node->len);
-        int argCount = 0;
+    case ND_FUNC_CALL:
+        //memcpy(name, node->funcname, node->len);
         for(int i = 0; node->block[i]; i++){
             gen(node->block[i]);
             argCount++;
         }
-        // 引数
+        // 引数: 下に向かってスタックは成長する. FILOなので引数は後ろから読み取る.
         for(int i = argCount - 1; i >= 0; i--){
             printf("  pop %s\n", argRegs[i]);
         }
         printf("  mov rax, rsp\n");
-        printf("  and rax, 15\n");
+        printf("  and rax, 15\n"); // 下位4bitをマスク. 15 := 0b00001111. 下位4bitが0であれば16の倍数.
         printf("  jnz .L.call.%03d\n", id);
         printf("  mov rax, 0\n");
-        printf("  call %s\n", name);
+        printf("  call %s\n", node->funcname);
         printf("  jmp .L.end.%03d\n", id);
         printf(".L.call.%03d:\n", id);
         printf("  sub rsp, 8\n");
         printf("  mov rax, 0\n");
-        printf("  call %s\n", name);
+        printf("  call %s\n", node->funcname);
         printf("  add rsp, 8\n");
         printf(".L.end.%03d:\n", id);
         return;
