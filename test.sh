@@ -21,7 +21,7 @@ assert(){
     fi
 }
 
-
+# assert 0 "main(){}"
 assert 2 "main(){ return 2; }"
 # assert 0 "0;"
 # assert 42 "42;"

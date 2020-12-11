@@ -96,7 +96,7 @@ struct Node{
     Node *rhs; // 右辺
     Node **block; // {}内, ND_BLOCK, ND_FUNC_xx
     char *funcname; // kind == ND_FUNC, ND_FUNC_xx
-    int len;    // kind == ND_FUNC
+    // int len;    // kind == ND_FUNC
     int val;    // kindがND_NUMの場合のみ使う.
     int offset; // kindがND_LVERの場合のみ使う.
 };

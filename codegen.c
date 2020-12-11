@@ -55,17 +55,17 @@ Node *func(){
         error("This is not a function.");
     }
     node = calloc(1, sizeof(Node));
-    node->kind = ND_BLOCK;
+    node->kind = ND_FUNC_DEF;
     node->funcname = calloc(100, sizeof(char));
     memcpy(node->funcname, tok->str, tok->len);
     expect("(");
     expect(")");
-    expect("{");
-    node->block = calloc(100, sizeof(Node));
-    for(int i = 0; !consume("}"); i++){
-        node->block[i] = stmt();
-    }
-    // node->lhs = stmt();
+    // expect("{");
+    // node->block = calloc(100, sizeof(Node));
+    // for(int i = 0; !consume("}"); i++){
+    //     node->block[i] = stmt();
+    // }
+    node->lhs = stmt();
     return node;
 }
 
@@ -315,6 +315,18 @@ void gen(Node *node){
     int argCount = 0;
 
     switch (node->kind){
+    case ND_FUNC_DEF:
+        printf("%s:\n", node->funcname);
+        printf("  push rbp\n");
+        printf("  mov rbp, rsp\n");
+        printf("  sub rsp, 208\n"); // 8 * 26文字
+        
+        gen(node->lhs);
+
+        printf("  mov rsp, rbp\n");
+        printf("  pop rbp\n");
+        printf("  ret\n");
+        return;
     case ND_FUNC_CALL:
         //memcpy(name, node->funcname, node->len);
         for(int i = 0; node->block[i]; i++){
@@ -337,6 +349,7 @@ void gen(Node *node){
         printf("  call %s\n", node->funcname);
         printf("  add rsp, 8\n");
         printf(".L.end.%03d:\n", id);
+        printf("  push rax\n");
         return;
     case ND_BLOCK:
         for(int i = 0; node->block[i]; i++){

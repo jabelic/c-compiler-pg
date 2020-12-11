@@ -616,7 +616,7 @@ printf(".L.end.%03d:\n", id);
 
 ## part17
 
-[ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+[ステップ15: 関数の定義に対応する - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9715-%E9%96%A2%E6%95%B0%E3%81%AE%E5%AE%9A%E7%BE%A9%E3%81%AB%E5%AF%BE%E5%BF%9C%E3%81%99%E3%82%8B)
 [ - github/pluswing/c_compiler]()
 
 
