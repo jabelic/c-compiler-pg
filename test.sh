@@ -21,8 +21,16 @@ assert(){
     fi
 }
 
-# assert 0 "main(){}"
+assert 7 "main(){ return 3+4;}"
 assert 2 "main(){ return 2; }"
+assert 2 "main () return 2;"
+assert 2 "
+main(){
+    addfunc();
+}
+addfunc(){ 
+    return 2;
+}"
 # assert 0 "0;"
 # assert 42 "42;"
 # assert 21 "5+20-4;"
