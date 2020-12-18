@@ -23,7 +23,7 @@ assert(){
 
 assert 7 "main(){ return 3+4;}"
 assert 2 "main(){ return 2; }"
-assert 2 "main () return 2;"
+assert 2 "main () return 2;" # これを禁止したい
 assert 2 "
 main(){
     addfunc();
