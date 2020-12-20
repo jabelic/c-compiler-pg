@@ -78,7 +78,7 @@ services:
     tty: true
 ```
 
-`$ docker-comopse up -d`
+`$ docker-compose up -d`
 
 `$ docker-compose exec web bash`
 
