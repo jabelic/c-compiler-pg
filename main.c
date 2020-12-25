@@ -24,10 +24,11 @@ int main(int argc, char **argv){
     // printf("  mov rbp, rsp\n");
     // printf("  sub rsp, 208\n"); // 8 * 26文字
 
+    cur_func = 0;
     //先頭の式から順にアセンブリコード生成
     for (int i=0; code[i]; i++){
+        cur_func++;
         gen(code[i]);
-
         // 式の評価結果としてスタックに一つの値が残っている
         // はずなので, スタックが溢れないようにpopしておく
         // printf("  pop rax\n");

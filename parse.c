@@ -6,7 +6,8 @@ char *user_input;
 Token *token;
 
 // 複数文字のlocal変数
-LVar *locals;
+LVar *locals[100];
+int cur_func = 0;
 
 void error_at(char *loc, char *fmt, ...){
     va_list ap;
@@ -228,7 +229,7 @@ Token *tokenize(){
 }
 
 LVar *find_lvar(Token *tok){
-    for (LVar *var = locals; var; var = var->next){ // 全ての変数名を参照してその変数名が使われているかどうか確認.
+    for (LVar *var = locals[cur_func]; var; var = var->next){ // 全ての変数名を参照してその変数名が使われているかどうか確認.
         if (var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
             return var;
         }

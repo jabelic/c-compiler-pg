@@ -48,8 +48,8 @@ extern char *user_input;
 // 現在着目しているトークン
 extern Token *token;
 
-extern LVar *locals;
-
+extern LVar *locals[];
+extern int cur_func;
 
 void error(char *fmt,...);
 void error_at(char *loc, char *fmt,...);

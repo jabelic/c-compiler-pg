@@ -31,6 +31,15 @@ main(){
 addfunc(a, b, c){ 
     return a+c;
 }"
+assert 55 "main () {
+    a = 10;
+  return sum(a);
+}
+sum(n) {
+  if (n < 0) return 0;
+  return n + sum(n - 1);
+}
+"
 # assert 0 "0;"
 # assert 42 "42;"
 # assert 21 "5+20-4;"
