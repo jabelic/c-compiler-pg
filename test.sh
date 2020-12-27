@@ -36,53 +36,59 @@ assert 55 "main () {
   return sum(a);
 }
 sum(n) {
+  b = 20;
   if (n < 0) return 0;
   return n + sum(n - 1);
 }
 "
-# assert 0 "0;"
-# assert 42 "42;"
-# assert 21 "5+20-4;"
-# assert 41 " 12 + 34 - 5 ;"
-# assert 47 "5+6*7;"
-# assert 15 "5*(9-6);"
-# assert 4 "(3+5)/2;"
-# assert 10 "-10+20;"
-# assert 10 "- -10;"
-# assert 10 "- - +10;"
+assert 0 "main(){ return 0; }"
+assert 42 "main() { return 42; }"
+assert 21 "main(){ return 5+20-4; }"
+assert 41 "main(){ return 12 + 34 - 5 ;}"
+assert 47 "main(){ return 5+6*7; }"
+assert 15 "main(){ return 5*(9-6); }"
+assert 4 "main(){ return (3+5)/2; }"
+assert 10 "main(){ return -10+20; }"
+assert 10 "main(){ return - -10; }"
+assert 10 "main(){ return - - +10; }"
 
-# assert 0 "0==1;"
-# assert 1 "42==42;"
-# assert 1 "0!=1;"
-# assert 0 "42!=42;"
+assert 0 "main(){ return  0==1; }"
+assert 1 "main(){ return 42==42; }"
+assert 1 "main(){ return 0!=1; }"
+assert 0 "main(){ return 42!=42; }"
 
-# assert 1 "0<1;"
-# assert 0 "1<1;"
-# assert 0 "2<1;"
-# assert 1 "0<=1;"
-# assert 1 "1<=1;"
-# assert 0 "2<=1;"
+assert 1 "main(){ return 0<1; }"
+assert 0 "main(){ return 1<1; }"
+assert 0 "main(){ return 2<1; }"
+assert 1 "main(){ return 0<=1; }"
+assert 1 "main(){ return 1<=1; }"
+assert 0 "main(){ return 2<=1; }"
 
-# assert 1 "1>0;"
-# assert 0 "1>1;"
-# assert 0 "1>2;"
-# assert 1 "1>=0;"
-# assert 1 "1>=1;"
-# assert 0 "1>=2;"
+assert 1 "main(){ return 1>0; }"
+assert 0 "main(){ return 1>1; }"
+assert 0 "main(){ return 1>2; }"
+assert 1 "main(){ return 1>=0; }"
+assert 1 "main(){ return 1>=1; }"
+assert 0 "main(){ return 1>=2; }"
 
 
 # # variable
-# assert 14 "a = 3;b = 5 * 6 - 8;a + b / 2;"
+assert 14 "main(){
+    a = 3;
+    b = 5 * 6 - 8;
+    return a + b / 2; }"
 
 # # return 
-# assert 6 "foo = 1;
-# bar = 2 + 3;
-#     foo + bar;"
-# assert 5 "return 5;"
-# assert 14 "a = 3;
-# b = 5 * 6 - 8;
-# return a + b / 2;"
-# assert 8 "return 8;"
+assert 6 "main(){
+    foo = 1;
+    bar = 2 + 3;
+    return (foo + bar); }"
+# ()を抜くとError. 何故だろう.
+
+assert 5 "main(){ return 5; }"
+assert 14 "main(){ a = 3;
+    b = 5 * 6 - 8;
+    return a + b / 2; }"
 
 # # if
 # assert 3 "a = 3;
