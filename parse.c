@@ -187,7 +187,7 @@ Token *tokenize(){
         }*/
 
 
-        if (strchr("+-*/()<>=;{},", *p)){// char *strchr(const char *s, int c); 
+        if (strchr("+-*/()<>=;{},&", *p)){// char *strchr(const char *s, int c); 
             // 文字列sのなかで最初のcharにcastされたcが見つかった位置を返す
             // なかったらNULLを返す
 

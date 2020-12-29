@@ -87,6 +87,8 @@ typedef enum{
     // ND_FUNC, // function
     ND_FUNC_CALL, // call function
     ND_FUNC_DEF, // define function
+    ND_ADDR, // &
+    ND_DEREF, // *
 } NodeKind;
 
 typedef struct Node Node;

@@ -39,8 +39,7 @@ sum(n) {
   b = 20;
   if (n < 0) return 0;
   return n + sum(n - 1);
-}
-"
+}"
 assert 0 "main(){ return 0; }"
 assert 42 "main() { return 42; }"
 assert 21 "main(){ return 5+20-4; }"
@@ -91,15 +90,15 @@ assert 14 "main(){ a = 3;
     return a + b / 2; }"
 
 # # if
-# assert 3 "a = 3;
-# if(a == 3) return a;"
-# assert 5 "
-# if(3 != 3) return 3;
-# return 5;"
-# assert 5 "a = 3;
-# b = 5;
-# if(a == 5) return a;
-# else return b;"
+assert 3 "main() {a = 3;
+if(a == 3) return a;}"
+assert 5 "main(){
+if(3 != 3) return 3;
+return 5;}"
+assert 5 "main(){a = 3;
+b = 5;
+if(a == 5) return a;
+else return b;}"
 
 # assert 11 "i = 0;
 # while (i <= 10) i = i + 1;
@@ -132,5 +131,10 @@ assert 14 "main(){ a = 3;
 # assert 0 "var(3, 4);"
 # assert 0 "var2(3, 4, 5);"
 
+assert 3 "main() {
+  x = 3;
+  y = &x;
+  return *y;
+}"
 
 echo OK

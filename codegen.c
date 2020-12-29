@@ -31,7 +31,7 @@ equality   = relational ("==" relational | "!=" relational)*
 relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 add        = mul ("+" mul | "-" mul)*
 mul        = unary ("*" unary | "/" unary)*
-unary      = ("+" | "-")? primary
+unary      = ("+" | "-" | "*" | "&" )? primary
 primary    = num
             | ident ("(" expr* ")")?
             | "(" expr ")"
@@ -40,6 +40,7 @@ primary    = num
 Node *code[100];
 
 
+// program    = func*
 void program(){
     int i = 0;
     while(!at_eof()){
@@ -48,6 +49,7 @@ void program(){
     code[i] = NULL;
 }
 
+// func       = ident "(" ")" stmt
 Node *func(){
     cur_func++;
     Node *node;
@@ -83,6 +85,12 @@ Node *func(){
     return node;
 }
 
+// stmt       = expr ";" 
+//             | "{" stmt* "}"
+//             | "if" "(" expr ")" stmt ("else" stmt)?
+//             | "while" "(" expr ")" stmt
+//             | "for" "(" expr? ";" expr? ";" expr? ")" stmt
+//             | "return" expr ";"
 Node *stmt(){
     Node *node;
     if(consume("{")){
@@ -161,11 +169,12 @@ Node *stmt(){
     return node;
 }
 
+// expr       = assign
 Node *expr(){
     return assign();
 }
 
-
+// assign     = equality ("=" assign)?
 Node *assign(){
     Node *node = equality();
     if (consume("=")){
@@ -175,7 +184,7 @@ Node *assign(){
 }
 
 
-
+// equality   = relational ("==" relational | "!=" relational)*
 Node *equality(){
     Node *node = relational();
     for(;;){
@@ -191,6 +200,7 @@ Node *equality(){
     }
 }
 
+// relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 Node *relational(){
     Node *node = add();
 
@@ -213,6 +223,7 @@ Node *relational(){
     }
 }
 
+// add        = mul ("+" mul | "-" mul)*
 Node *add(){
     Node *node = mul();
     // ここでlhsを先に入れて、
@@ -228,6 +239,7 @@ Node *add(){
     }
 }
 
+// mul        = unary ("*" unary | "/" unary)*
 Node *mul(){
     Node *node = unary();
 
@@ -242,6 +254,7 @@ Node *mul(){
     }
 }
 
+// unary      = ("+" | "-" | "*" | "&" )? primary
 Node *unary(){//ちゃんと数字にpointerが当たってから見るぞ！！と言うやつ.
     if (consume("+")){
         return unary();
@@ -249,9 +262,18 @@ Node *unary(){//ちゃんと数字にpointerが当たってから見るぞ！！
     if (consume("-")){
         return new_node(ND_SUB, new_node_num(0), unary());
     }
+    if (consume("&")){
+        return new_node(ND_ADDR, unary(), NULL);
+    }
+    if (consume("*")){
+        return new_node(ND_DEREF, unary(), NULL);
+    }
     return primary();
 }
 
+// primary    = num
+//             | ident ("(" expr* ")")?
+//             | "(" expr ")"
 Node *primary(){
     // 次のトークンが"("なら "(" expr ")"のはず
     if (consume("(")){
@@ -308,7 +330,7 @@ Node* variable(Token *tok){
         locals[cur_func] = lvar;
         char name[100] = {0};
         memcpy(name, tok->str, tok->len);
-        fprintf(stderr, "*NEW VARIABKE* %s\n", name);
+        // fprintf(stderr, "*NEW VARIABKE* %s\n", name);
     }
     //node->offset = (tok->str[0] - 'a' + 1) * 8;
     return node;
@@ -336,6 +358,15 @@ void gen(Node *node){
     int argCount = 0;
 
     switch (node->kind){
+    case ND_ADDR:
+        gen_lval(node->lhs);
+        return;
+    case ND_DEREF:
+        gen(node->lhs);
+        printf("  pop rax\n");
+        printf("  mov rax, [rax]\n");
+        printf("  push rax\n");
+        return;
     case ND_FUNC_DEF:
         printf("%s:\n", node->funcname);
         // プロローグ 
