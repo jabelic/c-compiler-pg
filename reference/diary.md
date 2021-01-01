@@ -653,20 +653,57 @@ printf(".L.end.%03d:\n", id);
 ## part17
 
 [ステップ15: 関数の定義に対応する - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9715-%E9%96%A2%E6%95%B0%E3%81%AE%E5%AE%9A%E7%BE%A9%E3%81%AB%E5%AF%BE%E5%BF%9C%E3%81%99%E3%82%8B)
-[ - github/pluswing/c_compiler]()
 
+- プロローグ とエピローグを`codegen.c`の`gen()`に押し込んだ.
+  - 必ず関数内でコードを書くことにした。`main`関数は必須.
+
+- 関数定義
+  - 引数の値をスタックに積む
+  - ローカル変数が引数に続いてスタックに積まれる.
+  - ローカル変数分ズレたRSPを引数のに戻す.
+  - ブロック内を処理.
+- 関数呼び出し
+  - スタックをpopして引数を後ろ側から格納
+    - スタックはFILOなので, 頭から引数を入れて取り出すときはケツからということになるs  
 
 
 ## part18
 
-[ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
-[ - github/pluswing/c_compiler]()
+[ステップ16: 単項&と単項* - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9716-%E5%8D%98%E9%A0%85%E3%81%A8%E5%8D%98%E9%A0%85)
+[#39 & operator and * operator - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/commit/ad40cf0faeccc6e4dcde8a56ab1087a600097e3d)
 
+- 単項演算子`* &`を追加
+- `&x`
+  - `x`のアドレスを整数として返す.
+  ```
+    mov rax, rbp
+    sub rax, %d
+    push rax
+  ```
+- `*x`
+  - `x`の値を見に行って, その値がアドレスであるとして, そのアドレスにある値を見に行って返す.
+  ```
+    pop rax
+    mov rax, [rax]
+    push rax
+  ```
 
 ## part19
 
+[ステップ17: 暗黙の変数定義を廃止して、intというキーワードを導入する - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9717-%E6%9A%97%E9%BB%99%E3%81%AE%E5%A4%89%E6%95%B0%E5%AE%9A%E7%BE%A9%E3%82%92%E5%BB%83%E6%AD%A2%E3%81%97%E3%81%A6int%E3%81%A8%E3%81%84%E3%81%86%E3%82%AD%E3%83%BC%E3%83%AF%E3%83%BC%E3%83%89%E3%82%92%E5%B0%8E%E5%85%A5%E3%81%99%E3%82%8B)
+
+[#40 int (variable) - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/commit/e8c5e8d7cdc361e58800a56d526f1858da74a285)
+
+
+
+## part20
+
 [ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
 [ - github/pluswing/c_compiler]()
 
 
+## part21
+
+[ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+[ - github/pluswing/c_compiler]()
 

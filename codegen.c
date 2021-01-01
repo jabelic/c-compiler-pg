@@ -18,12 +18,13 @@ Node *new_node_num(int val){
 /*
 四則演算, 比較, 変数, 代入, セミコロン.
 program    = func*
-func       = ident "(" ")" stmt
+func       = "int" ident "(" "int" ident ")" stmt
 stmt       = expr ";" 
             | "{" stmt* "}"
             | "if" "(" expr ")" stmt ("else" stmt)?
             | "while" "(" expr ")" stmt
             | "for" "(" expr? ";" expr? ";" expr? ")" stmt
+            | "int" ident ";"
             | "return" expr ";"
 expr       = assign
 assign     = equality ("=" assign)?
@@ -49,7 +50,7 @@ void program(){
     code[i] = NULL;
 }
 
-// func       = ident "(" ")" stmt
+// func       = "int" ident "(" ("int" ident ("," "int" ident)*)? ")" stmt
 Node *func(){
     cur_func++;
     Node *node;
@@ -91,6 +92,7 @@ Node *func(){
 //             | "while" "(" expr ")" stmt
 //             | "for" "(" expr? ";" expr? ";" expr? ")" stmt
 //             | "return" expr ";"
+//             | "int" ident ";"
 Node *stmt(){
     Node *node;
     if(consume("{")){
@@ -162,9 +164,17 @@ Node *stmt(){
         node = calloc(1, sizeof(Node));
         node->kind = ND_RETURN;
         node->lhs = expr();
-    } else {
-        node = expr();
+        expect(";");
+        return node;
     }
+    if (consume_kind(TK_TYPE)){
+        Token *tok = consume_kind(TK_IDENT);
+        node = define_variable(tok);
+        expect(";");
+        return node;
+    } 
+    
+    node = expr();
     expect(";");
     return node;
 }
@@ -310,29 +320,40 @@ Node *primary(){
     return new_node_num(expect_number());
 }
 
+
+Node* define_variable(Token *tok){
+    Node *node = calloc(1, sizeof(Node));//未定義の変数の分のメモリを確保
+    node->kind = ND_LVAR;
+    LVar *lvar = find_lvar(tok);
+    if(lvar != NULL){
+        char name[100] = {0};
+        memcpy(name, tok->str, tok->len);
+        error("redefined variable: %s", name);
+    }
+    lvar = calloc(1, sizeof(LVar));
+    lvar->next = locals[cur_func];
+    lvar->name = tok->str;
+    lvar->len = tok->len;
+    if (locals[cur_func] == NULL){
+        lvar->offset = 8;
+    }else{
+        lvar->offset = locals[cur_func]->offset + 8;
+    }
+    node->offset = lvar->offset;
+    locals[cur_func] = lvar;
+    return node;
+}
+
 Node* variable(Token *tok){
     Node *node = calloc(1, sizeof(Node));//未定義の変数の分のメモリを確保
     node->kind = ND_LVAR;
     LVar *lvar = find_lvar(tok);
-    if(lvar){
-        node->offset = lvar->offset;
-    }else{
-        lvar = calloc(1, sizeof(LVar));
-        lvar->next = locals[cur_func];
-        lvar->name = tok->str;
-        lvar->len = tok->len;
-        if (locals[cur_func] == NULL){
-            lvar->offset = 8;
-        }else{
-            lvar->offset = locals[cur_func]->offset + 8;
-        }
-        node->offset = lvar->offset;
-        locals[cur_func] = lvar;
+    if(lvar == NULL){
         char name[100] = {0};
         memcpy(name, tok->str, tok->len);
-        // fprintf(stderr, "*NEW VARIABKE* %s\n", name);
+        error("undefined variable: %s", name);
     }
-    //node->offset = (tok->str[0] - 'a' + 1) * 8;
+    node->offset = lvar->offset;
     return node;
 }
 

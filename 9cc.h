@@ -15,6 +15,7 @@ typedef enum{
     TK_ELSE, //else
     TK_WHILE, // while
     TK_FOR, // for
+    TK_TYPE, // int
     TK_EOF,      // 入力の終わりを表すトークン
 } Tokenkind;     //0,1,2
 //TAG名は省略している
@@ -121,7 +122,8 @@ Node *mul();
 Node *unary();
 Node *primary();
 extern Node *code[];
-Node* variable(Token *tok);
+Node *define_variable(Token *tok);
+Node *variable(Token *tok);
 
 void gen(Node *node);
 void gen_lval(Node *node);
