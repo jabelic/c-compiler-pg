@@ -34,6 +34,13 @@ struct Token{
 };
 // linked listを書いている??
 
+typedef struct Type Type;
+struct Type {
+  enum { INT, PTR } ty;
+  struct Type *ptr_to;
+};
+
+
 typedef struct LVar LVar;
 
 struct LVar {
@@ -41,8 +48,8 @@ struct LVar {
     char *name;
     int len;
     int offset;
+    Type *type;
 };
-
 
 extern char *user_input;
 
@@ -122,7 +129,7 @@ Node *mul();
 Node *unary();
 Node *primary();
 extern Node *code[];
-Node *define_variable(Token *tok);
+Node *define_variable();
 Node *variable(Token *tok);
 
 void gen(Node *node);

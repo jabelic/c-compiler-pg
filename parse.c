@@ -66,7 +66,7 @@ Token *consume_kind(Tokenkind kind) {
 void expect(char *op){
     if (token->kind != TK_RESERVED ||
         strlen(op) != token -> len ||
-        memcmp(token->str, op, token->len)){
+        memcmp(token->str, op, token->len)){ // str=opなら0を返すので, falseと解釈.
         error_at(token->str, "'%s'ではありません", op);
     }
     token = token->next;

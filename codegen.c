@@ -59,23 +59,23 @@ Node *func(){
     }
     Token *tok = consume_kind(TK_IDENT);
     if(tok == NULL){
-        error("This is not a function.");
+        error("This is not a function."); // int for(;;){}とか.
     }
     node = calloc(1, sizeof(Node));
     node->kind = ND_FUNC_DEF;
     node->funcname = calloc(100, sizeof(char));
     node->args = calloc(10, sizeof(Node*));
     memcpy(node->funcname, tok->str, tok->len);
-    expect("(");
+    expect("(");// 次にtokenをつなげる
     for(int i = 0; !consume(")"); i++){
-        if (!consume_kind(TK_TYPE)){
+        if (consume_kind(TK_TYPE)){
             error("function arges type not found");
         }
-        Token *tok = consume_kind(TK_IDENT);
-        if (tok != NULL){
-            node->args[i] = define_variable(tok);
-            memcpy(node->args[i], tok->str, tok->len);
-        }
+        // Token *tok = consume_kind(TK_IDENT);
+        // if (tok == NULL){
+        //     error("Invalid args");
+        // }
+        node->args[i] = define_variable();
         if (consume(")")) { // これいる？？？
             break;
         }
@@ -98,7 +98,7 @@ Node *func(){
 //             | "while" "(" expr ")" stmt
 //             | "for" "(" expr? ";" expr? ";" expr? ")" stmt
 //             | "return" expr ";"
-//             | "int" ident ";"
+//             | "int" "*"*? ident ";"
 Node *stmt(){
     Node *node;
     if(consume("{")){
@@ -174,8 +174,11 @@ Node *stmt(){
         return node;
     }
     if (consume_kind(TK_TYPE)){
-        Token *tok = consume_kind(TK_IDENT);
-        node = define_variable(tok);
+        // Token *tok = consume_kind(TK_IDENT);
+        // if (tok == NULL){
+        //     error("Invalid define variable");
+        // }
+        node = define_variable();
         expect(";");
         return node;
     } 
@@ -327,7 +330,28 @@ Node *primary(){
 }
 
 
-Node* define_variable(Token *tok){
+Node* define_variable(){
+
+    // pointer対策. linked list.
+    Type *type;
+    type = calloc(1, sizeof(Type));
+    type->ty = INT;
+    type->ptr_to = NULL;
+    while (consume("*")){// pointerであれば
+        Type *t;
+        t = calloc(1, sizeof(Type));
+        t->ty = PTR;
+        t->ptr_to = type;
+        type = t; // これ, 大丈夫? overwriteしてない?
+    }// pointer宣言しているので, type, t自体はアドレスが入っている
+     // なので, typeというpointerはt->ptr_toに入れているので, overwriteしておk
+     // typeにt(pointer)を入れて, このtのpointerを次のt->ptr_toにまた入れる, を繰り返す.
+    
+    Token *tok = consume_kind(TK_IDENT);
+    if (tok == NULL){
+        error("Invalid args");
+    }
+
     Node *node = calloc(1, sizeof(Node));//未定義の変数の分のメモリを確保
     node->kind = ND_LVAR;
     LVar *lvar = find_lvar(tok);
@@ -345,6 +369,7 @@ Node* define_variable(Token *tok){
     }else{
         lvar->offset = locals[cur_func]->offset + 8;
     }
+    lvar->type = type; // Type *typeで定義した情報を
     node->offset = lvar->offset;
     locals[cur_func] = lvar;
     return node;
@@ -364,6 +389,10 @@ Node* variable(Token *tok){
 }
 
 void gen_lval(Node *node){
+    if (node->kind == ND_DEREF){
+        gen(node->lhs);
+        return;
+    }
     if (node->kind != ND_LVAR){
         error("The left side value of the assignment is not a variable");
     }

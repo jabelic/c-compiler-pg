@@ -21,6 +21,14 @@ assert(){
     fi
 }
 
+assert 3 "int main() {
+  int x;
+  int *y;
+  y = &x;
+  *y = 3;
+  return x;
+}
+"
 
 assert 0 'int main() { return 0; }'
 assert 42 'int main() { return 42; }'
@@ -76,5 +84,5 @@ assert 10 'int main() { int i; i=0; i=0; while(i<10) i=i+1; return i; }'
 
 # assert 55 'int main() { int i=0; int j=0; for (i=0; i<=10; i=i+1) j=i+j; return j; }'
 assert 3 'int main() { for (;;) return 3; return 5; }'
-
+assert 1 "int main() { int i; i = 4; i = 1; return i; }"
 echo OK
