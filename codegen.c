@@ -54,6 +54,9 @@ void program(){
 Node *func(){
     cur_func++;
     Node *node;
+    if (!consume_kind(TK_TYPE)){
+        error("function return type not found");
+    }
     Token *tok = consume_kind(TK_IDENT);
     if(tok == NULL){
         error("This is not a function.");
@@ -65,9 +68,12 @@ Node *func(){
     memcpy(node->funcname, tok->str, tok->len);
     expect("(");
     for(int i = 0; !consume(")"); i++){
+        if (!consume_kind(TK_TYPE)){
+            error("function arges type not found");
+        }
         Token *tok = consume_kind(TK_IDENT);
         if (tok != NULL){
-            node->args[i] = variable(tok);
+            node->args[i] = define_variable(tok);
             memcpy(node->args[i], tok->str, tok->len);
         }
         if (consume(")")) { // これいる？？？

@@ -694,6 +694,8 @@ printf(".L.end.%03d:\n", id);
 
 [#40 int (variable) - github/pluswing/c_compiler](https://github.com/pluswing/c_compiler/commit/e8c5e8d7cdc361e58800a56d526f1858da74a285)
 
+- 変数だけintに対応する. 新しく定義される変数は`int`型を宣言しなければならないルールにする
+- 関数の宣言もintに対応する. func()をfix.
 
 
 ## part20
