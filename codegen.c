@@ -249,9 +249,20 @@ Node *add(){
     // consumeでtokenが一つ進んでからrhsをいれる?
     for(;;){ // 無限ループ.
         if (consume("+")){
-            node = new_node(ND_ADD, node, mul());
+            Node *r = mul();
+            if (node->type && node->type->ty == PTR){
+                int n = node->type->ptr_to->ty == INT ? 4 : 8;
+                r = new_node(ND_MUL, r, new_node_num(n));
+            }
+            node = new_node(ND_ADD, node, r);
+            // node = new_node(ND_ADD, node, mul());
         }else if (consume("-")){
-            node = new_node(ND_SUB, node, mul());
+            Node *r = mul();
+            if (node->type && node->type->ty == PTR){
+                int n = node->type->ptr_to->ty == INT ? 4 : 8;
+                r = new_node(ND_MUL, r, new_node_num(n));
+            }
+            node = new_node(ND_SUB, node, r);
         }else{
             return node;
         }
@@ -371,6 +382,7 @@ Node* define_variable(){
     }
     lvar->type = type; // Type *typeで定義した情報を
     node->offset = lvar->offset;
+    node->type = lvar->type;
     locals[cur_func] = lvar;
     return node;
 }
@@ -385,6 +397,7 @@ Node* variable(Token *tok){
         error("undefined variable: %s", name);
     }
     node->offset = lvar->offset;
+    node->type = lvar->type;
     return node;
 }
 

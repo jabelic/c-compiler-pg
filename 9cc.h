@@ -111,6 +111,7 @@ struct Node{
     Node **args;
     int val;    // kindがND_NUMの場合のみ使う.
     int offset; // kindがND_LVERの場合のみ使う.
+    Type *type; // kindがND_LVERの場合のみ使う.
 };
 
 
