@@ -252,7 +252,7 @@ Node *add(){
             Node *r = mul();
             if (node->type && node->type->ty == PTR){
                 int n = node->type->ptr_to->ty == INT ? 4 : 8;
-                r = new_node(ND_MUL, r, new_node_num(n));
+                r = new_node(ND_MUL, r, new_node_num(n)); // + に続く式
             }
             node = new_node(ND_ADD, node, r);
             // node = new_node(ND_ADD, node, mul());
