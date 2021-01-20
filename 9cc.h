@@ -16,6 +16,7 @@ typedef enum{
     TK_WHILE, // while
     TK_FOR, // for
     TK_TYPE, // int
+    TK_SIZEOF, // sizeof
     TK_EOF,      // 入力の終わりを表すトークン
 } Tokenkind;     //0,1,2
 //TAG名は省略している
@@ -39,7 +40,6 @@ struct Type {
   enum { INT, PTR } ty;
   struct Type *ptr_to;
 };
-
 
 typedef struct LVar LVar;
 

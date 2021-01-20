@@ -21,6 +21,31 @@ assert(){
     fi
 }
 
+# sizeof
+assert 4 "int main() {
+    int x;
+    return sizeof(x+2);
+}"
+assert 8 "int main() {
+    int *x;
+    return sizeof(x);
+}"
+assert 4 "int main() {
+    int *x;
+    return sizeof(*x);
+}"
+assert 4 "int main() {
+    return sizeof(1);
+}"
+# assert 8 "int main() {
+#     int *x;
+#     return sizeof(x+8);
+# }"
+
+assert 4 "int main() {
+  return sizeof(sizeof(1));
+}"
+
 assert 4 "int main(){ 
     int *p;
     alloc4(&p, 1, 2, 4, 8);

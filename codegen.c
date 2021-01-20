@@ -195,9 +195,9 @@ Node *expr(){
 
 // assign     = equality ("=" assign)?
 Node *assign(){
-    Node *node = equality();
+    Node *node = equality(); // 枠を取って
     if (consume("=")){
-        node = new_node(ND_ASSIGN, node, assign());
+        node = new_node(ND_ASSIGN, node, assign()); // equalityに渡すためにnodeの各枝を設定.
     }
     return node;
 }
@@ -284,8 +284,14 @@ Node *mul(){
     }
 }
 
-// unary      = ("+" | "-" | "*" | "&" )? primary
+// unary      = "sizeof" unary
+//                | ("+" | "-" | "*" | "&" )? primary
 Node *unary(){//ちゃんと数字にpointerが当たってから見るぞ！！と言うやつ.
+    if (consume_kind(TK_SIZEOF)){
+        Node *n = unary(); // これが中身. sizeofが入っていても対応できる. 中身の処理はせずに, 捨てる.
+        int size = n->type && n->type->ty == PTR ? 8 : 4;
+        return new_node_num(size); // 枝はここで終了.
+    }
     if (consume("+")){
         return unary();
     }
