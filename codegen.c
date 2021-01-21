@@ -289,6 +289,7 @@ Node *mul(){
 Node *unary(){//ちゃんと数字にpointerが当たってから見るぞ！！と言うやつ.
     if (consume_kind(TK_SIZEOF)){
         Node *n = unary(); // これが中身. sizeofが入っていても対応できる. 中身の処理はせずに, 捨てる.
+        // TODD: 中身に*がついていればnをデリファレンス. 変数を一段階リファレンスした結果を返す.
         int size = n->type && n->type->ty == PTR ? 8 : 4;
         return new_node_num(size); // 枝はここで終了.
     }
@@ -364,9 +365,15 @@ Node* define_variable(){
      // なので, typeというpointerはt->ptr_toに入れているので, overwriteしておk
      // typeにt(pointer)を入れて, このtのpointerを次のt->ptr_toにまた入れる, を繰り返す.
     
-    Token *tok = consume_kind(TK_IDENT);
+    Token *tok = consume_kind(TK_IDENT); // 識別子
     if (tok == NULL){
         error("Invalid args");
+    }
+    // 配列かチェック
+    if(consume("[")){
+        type->ty = ARRAY;
+        type->array_size =expect_number(); // 中身の数字を返してくれる.
+        expect("]");
     }
 
     Node *node = calloc(1, sizeof(Node));//未定義の変数の分のメモリを確保
@@ -454,9 +461,15 @@ void gen(Node *node){
             argCount++;
         }
         // ローカル変数が引数に続いてスタックに積まれる.(ここではなくて, stmtにいく. BNF参照)
-        // ローカル変数分もrspをsubしなければならない.
+        // ローカル変数分もrspをsubしなければならない.(配列も.)
         if(locals[cur_func]){
-            int offset = locals[cur_func][0].offset - argCount * 8;
+            //int offset = locals[cur_func][0].offset - argCount * 8;
+            int offset = 0;
+            for(LVar *cur = locals[cur_func]; cur; cur = cur->next){
+                // もしarray(int)なら, 4*配列サイズ. 変数(int)なら8.
+                offset += cur->type->ty == ARRAY ? cur->type->array_size * 4 : 8;
+            }
+            offset -= argCount * 8;
             printf("  sub rsp, %d\n", offset);
         }
         gen(node->lhs);
