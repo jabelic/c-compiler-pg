@@ -1,242 +1,429 @@
 #include "9cc.h"
 
-char *user_input;
-
-// 現在着目しているトークン
-Token *token;
-
-// 複数文字のlocal変数
-LVar *locals[100];
-int cur_func = 0;
-
-void error_at(char *loc, char *fmt, ...){
-    va_list ap;
-    va_start(ap, fmt);
-    int pos = loc - user_input;
-    fprintf(stderr, "%s\n", user_input);
-    fprintf(stderr, "%*s", pos, ""); // print pos spaces.
-    fprintf(stderr, "^ ");
-    vfprintf(stderr, fmt, ap);
-    fprintf(stderr, "\n");
-    exit(1);
+Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
+    Node *node = calloc(1, sizeof(Node));
+    node->kind = kind;
+    node->lhs = lhs;
+    node->rhs = rhs;
+    return node;
 }
 
-void error(char *fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-    vfprintf(stderr, fmt, ap);
-    fprintf(stderr, "\n");
-    exit(1);
-}
-
-// 次のトークンが期待している記号のときには、トークンを1つ読み進めて
-// 真を返す。それ以外の場合には偽を返す。
-bool consume(char *op){
-    if (token->kind != TK_RESERVED ||
-        strlen(op) != token -> len ||
-        memcmp(token->str, op, token->len)){
-        return false;
-    }
-    token = token->next;
-    return true;
+Node *new_node_num(int val){
+    Node *node = calloc(1, sizeof(Node));
+    node->kind = ND_NUM;
+    node->val = val;
+    return node;
 }
 
 /*
-Token *consume_ident(){
-    if (token->kind != TK_IDENT ||
-        strlen(tok) != token -> len ||
-        memcmp(token->str, tok, token->len)){
-            return NULL;
-        }
-    token = token->next;
-    return token;
-}
+四則演算, 比較, 変数, 代入, セミコロン.
+program    = func*
+func       = "int" ident "(" "int" ident ")" stmt
+stmt       = expr ";" 
+            | "{" stmt* "}"
+            | "if" "(" expr ")" stmt ("else" stmt)?
+            | "while" "(" expr ")" stmt
+            | "for" "(" expr? ";" expr? ";" expr? ")" stmt
+            | "int" ident ";"
+            | "return" expr ";"
+expr       = assign
+assign     = equality ("=" assign)?
+equality   = relational ("==" relational | "!=" relational)*
+relational = add ("<" add | "<=" add | ">" add | ">=" add)*
+add        = mul ("+" mul | "-" mul)*
+mul        = unary ("*" unary | "/" unary)*
+unary      = ("+" | "-" | "*" | "&" )? primary
+primary    = num
+            | ident ("(" expr* ")")?
+            | "(" expr ")"
 */
 
-Token *consume_kind(Tokenkind kind) {
-  if (token->kind != kind) {
-    return NULL;
-  }
-  Token *tok = token;
-  token = token->next;
-  return tok;
-}
+Node *code[100];
 
 
-void expect(char *op){
-    if (token->kind != TK_RESERVED ||
-        strlen(op) != token -> len ||
-        memcmp(token->str, op, token->len)){ // str=opなら0を返すので, falseと解釈.
-        error_at(token->str, "'%s'ではありません", op);
+// program    = func*
+void program(){
+    int i = 0;
+    while(!at_eof()){
+        code[i++] = func();
     }
-    token = token->next;
+    code[i] = NULL;
 }
 
-// 次のトークンが数値の場合、トークンを1つ読み進めてその数値を返す。
-// それ以外の場合にはエラーを報告する。
-int expect_number(){
-    if (token->kind != TK_NUM){
-        error_at(token->str, "Not a number");
+// func       = "int" ident "(" ("int" ident ("," "int" ident)*)? ")" stmt
+Node *func(){
+    cur_func++;
+    Node *node;
+    if (!consume_kind(TK_TYPE)){
+        error("function return type not found");
     }
-    int val = token->val;
-    token = token->next;
-    return val;
-}
-
-bool at_eof(){
-    return token->kind == TK_EOF;
-}
-
-// 新しいトークンを作成してcurに繋げる
-Token *new_token(Tokenkind kind, Token *cur, char *str, int len){
-    Token *tok = calloc(1, sizeof(Token));
-    tok->kind = kind;
-    tok->str = str;
-    tok->len = len;
-    cur->next = tok;
-    return tok;
-}
-
-bool startswith(char *p, char *q){
-    return memcmp(p, q, strlen(q)) == 0;
-}
-
-// 英数字 or _　であるかどうかを判定.
-int is_alnum(char c){
-    return ('a' <= c && c <= 'z') || 
-            ('A' <= c && c <= 'Z') ||
-            ('0' <= c && c <= '9') ||
-            (c == '_');
-}
-
-typedef struct ReservedWord ReservedWord;
-struct ReservedWord {
-    char *word;
-    Tokenkind kind;
-};
-
-ReservedWord reservedWords[] = {
-    {"return", TK_RETURN},
-    {"if", TK_IF},
-    {"else", TK_ELSE},
-    {"while", TK_WHILE},
-    {"for", TK_FOR},
-    {"int", TK_TYPE},
-    {"sizeof", TK_SIZEOF},
-    {"", TK_EOF},
-};
-
-
-// 入力されたコード列から連結リストを作成. BNFへの準備.
-Token *tokenize(){ 
-    char *p = user_input;
-    Token head;
-    head.next = NULL;
-    Token *cur = &head;
-
-    while (*p){
-        // 空白文字をスキップ
-        if (isspace(*p)){
-            p++;
-            continue;
+    Token *tok = consume_kind(TK_IDENT);
+    if(tok == NULL){
+        error("This is not a function."); // int for(;;){}とか.
+    }
+    node = calloc(1, sizeof(Node));
+    node->kind = ND_FUNC_DEF;
+    node->funcname = calloc(100, sizeof(char));
+    node->args = calloc(10, sizeof(Node*));
+    memcpy(node->funcname, tok->str, tok->len);
+    expect("(");// 次にtokenをつなげる
+    for(int i = 0; !consume(")"); i++){
+        if (consume_kind(TK_TYPE)){
+            error("function arges type not found");
         }
-        if (startswith(p, "==") || startswith(p, "!=") ||
-            startswith(p, "<=") || startswith(p, ">=")){
-                cur = new_token(TK_RESERVED, cur, p, 2);
-                p += 2;
-                continue;
+        // Token *tok = consume_kind(TK_IDENT);
+        // if (tok == NULL){
+        //     error("Invalid args");
+        // }
+        node->args[i] = define_variable();
+        if (consume(")")) { // これいる？？？
+            break;
+        }
+        expect(",");
+    }
+
+    // expect(")");
+    // expect("{");
+    // node->block = calloc(100, sizeof(Node));
+    // for(int i = 0; !consume("}"); i++){
+    //     node->block[i] = stmt();
+    // }
+    node->lhs = stmt();
+    return node;
+}
+
+// stmt       = expr ";" 
+//             | "{" stmt* "}"
+//             | "if" "(" expr ")" stmt ("else" stmt)?
+//             | "while" "(" expr ")" stmt
+//             | "for" "(" expr? ";" expr? ";" expr? ")" stmt
+//             | "return" expr ";"
+//             | "int" "*"*? ident ";"
+Node *stmt(){
+    Node *node;
+    if(consume("{")){
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_BLOCK;
+        node->block = calloc(100, sizeof(Node));
+        for(int i = 0; !consume("}"); i++){
+            node->block[i] = stmt();
+        }
+        return node;
+    }
+
+    if (consume_kind(TK_FOR)){
+        expect("(");
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_FOR;
+
+        Node *left = calloc(1, sizeof(Node));
+        left->kind = ND_FOR_LEFT;
+        Node *right = calloc(1, sizeof(Node));
+        right->kind = ND_FOR_RIGHT;
+
+        if (!consume(";")){
+            left->lhs = expr();
+            expect(";");
+        }
+        if (!consume(";")){
+            left->rhs = expr();
+            expect(";");
+        }
+        if (!consume(")")){
+            right->lhs = expr();
+            expect(")");
+        }
+        right->rhs = stmt();
+
+        node->lhs = left;
+        node->rhs = right;
+        return node;
+    }
+
+    if (consume_kind(TK_WHILE)){
+        expect("(");
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_WHILE;
+        node->lhs = expr();
+        expect(")");
+        node->rhs = stmt();
+        return node;
+    }
+    if (consume_kind(TK_IF)){
+        expect("(");
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_IF;
+        node->lhs = expr();
+        expect(")");
+        node->rhs = stmt();
+        if (consume_kind(TK_ELSE)){
+            Node *els = calloc(1, sizeof(Node));
+            els->kind = ND_ELSE;
+            els->lhs = node->rhs; // これで枝を1本にすることができる?
+            els->rhs = stmt();
+            node->rhs = els;
+        }
+        return node;
+    }
+
+    if (consume_kind(TK_RETURN)){
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_RETURN;
+        node->lhs = expr();
+        expect(";");
+        return node;
+    }
+    if (consume_kind(TK_TYPE)){
+        // Token *tok = consume_kind(TK_IDENT);
+        // if (tok == NULL){
+        //     error("Invalid define variable");
+        // }
+        node = define_variable();
+        expect(";");
+        return node;
+    } 
+    
+    node = expr();
+    expect(";");
+    return node;
+}
+
+// expr       = assign
+Node *expr(){
+    return assign();
+}
+
+// assign     = equality ("=" assign)?
+Node *assign(){
+    Node *node = equality(); // 枠を取って
+    if (consume("=")){
+        node = new_node(ND_ASSIGN, node, assign()); // equalityに渡すためにnodeの各枝を設定.
+    }
+    return node;
+}
+
+
+// equality   = relational ("==" relational | "!=" relational)*
+Node *equality(){
+    Node *node = relational();
+    for(;;){
+        if (consume("==")){
+            node = new_node(ND_EQ, node, relational());
+        }
+        else if(consume("!=")){
+            node = new_node(ND_NE, node, relational());
+        }
+        else {
+            return node;
+        }
+    }
+}
+
+// relational = add ("<" add | "<=" add | ">" add | ">=" add)*
+Node *relational(){
+    Node *node = add();
+
+    for(;;){
+        if (consume("<")){
+            node = new_node(ND_LT, node, add());
+        }
+        else if (consume("<=")){
+            node = new_node(ND_LE, node, add());
+        }
+        else if (consume(">")){
+            node = new_node(ND_LT, add(), node);
+        }
+        else if (consume(">=")){
+            node = new_node(ND_LE, add(), node);
+        }
+        else{
+            return node;
+        }
+    }
+}
+
+// add        = mul ("+" mul | "-" mul)*
+Node *add(){
+    Node *node = mul();
+    // ここでlhsを先に入れて、
+    // consumeでtokenが一つ進んでからrhsをいれる?
+    for(;;){ // 無限ループ.
+        if (consume("+")){
+            Node *r = mul();
+            if (node->type && node->type->ty == PTR){
+                int n = node->type->ptr_to->ty == INT ? 4 : 8;
+                r = new_node(ND_MUL, r, new_node_num(n)); // + に続く式
             }
-
-        bool found = false;
-        for(int i = 0; reservedWords[i].kind != TK_EOF; i++){
-            char *wrd = reservedWords[i].word;
-            int len = strlen(wrd);
-            Tokenkind kind = reservedWords[i].kind;
-            if (startswith(p, wrd) && !is_alnum(p[len])){
-                cur = new_token(kind, cur, p, len);
-                p += len;
-                found = true;
-                break;
+            node = new_node(ND_ADD, node, r);
+            // node = new_node(ND_ADD, node, mul());
+        }else if (consume("-")){
+            Node *r = mul();
+            if (node->type && node->type->ty == PTR){
+                int n = node->type->ptr_to->ty == INT ? 4 : 8;
+                r = new_node(ND_MUL, r, new_node_num(n));
             }
-        }
-        if (found){
-            continue;
-        }// なんでこうしないといけない？
-
-        /*if (startswith(p, "return") && !is_alnum(p[6])){
-            cur = new_token(TK_RETURN, cur, p, 6);
-            //tokens[i].ty = TK_RETURN;
-            //tokens[i].str = p;
-            //i++;
-            p += 6;
-            continue;
-        }
-
-        if (startswith(p, "if") && !is_alnum(p[2])){
-            cur = new_token(TK_IF, cur, p, 2);
-            p += 2;
-            continue;
-        }
-        if (startswith(p, "else") && !is_alnum(p[4])){
-            cur = new_token(TK_ELSE, cur, p, 4);
-            p += 4;
-            continue;
-        }
-        if (startswith(p, "while") && !is_alnum(p[5])){
-            cur = new_token(TK_WHILE, cur, p, 5);
-            p += 5;
-            continue;
-        }*/
-
-
-        if (strchr("+-*/()<>=;{},&[]", *p)){
-            // char *strchr(const char *s, int c); 
-            // 文字列sのなかで最初のcharにcastされたcが見つかった位置を返す
-            // なかったらNULLを返す
-
-            cur = new_token(TK_RESERVED, cur, p++, 1); // 文字のポインタをcurにつなげる.
-            /*
-            cur = new_token(TK_RESERVED, cur, p);
-            p++ 
-            と同じ. 後方で++するやつらしい...
-            だから, ここでは文字を入れて、次の数字のところにポインタを一つ進めている.
-            */
-            continue;
-        }
-
-        if ('a' <= *p && *p <= 'z'){ // ""を使うとtokenizeしてくれない...
-            char *c = p;
-            while(is_alnum(*c)){
-                c++;
-            }
-            int len = c - p;
-            //fprintf(stderr, "debug  %s, %d\n", p, len);
-            cur = new_token(TK_IDENT, cur, p, len);
-            p = c;
-            continue;
-        }
-        
-        if (isdigit(*p)){
-            cur = new_token(TK_NUM, cur, p, 0);
-            char *q = p;
-            cur->val = strtol(p, &p, 10); // pが数字ならn(今は10)進法でlong型に変換して返す.
-                                        // 数として認識できない文字に行き当たるとpにその文字のポインタを格納.
-            cur->len = p - q;
-            continue;
-        }
-
-        error_at(p, "Couldn't tokenize...");
-    }
-    new_token(TK_EOF, cur, p, 0);
-    return head.next;
-}
-
-LVar *find_lvar(Token *tok){
-    for (LVar *var = locals[cur_func]; var; var = var->next){ // 全ての変数名を参照してその変数名が使われているかどうか確認.
-        if (var->len == tok->len && !memcmp(tok->str, var->name, var->len)){
-            return var;
+            node = new_node(ND_SUB, node, r);
+        }else{
+            return node;
         }
     }
-    return NULL;
 }
 
+// mul        = unary ("*" unary | "/" unary)*
+Node *mul(){
+    Node *node = unary();
+
+    for(;;){
+        if(consume("*")){
+            node = new_node(ND_MUL, node, unary());
+        }else if(consume("/")){
+            node = new_node(ND_DIV, node, unary());
+        }else{
+            return node;
+        }
+    }
+}
+
+// unary      = "sizeof" unary
+//                | ("+" | "-" | "*" | "&" )? primary
+Node *unary(){//ちゃんと数字にpointerが当たってから見るぞ！！と言うやつ.
+    if (consume_kind(TK_SIZEOF)){
+        Node *n = unary(); // これが中身. sizeofが入っていても対応できる. 中身の処理はせずに, 捨てる.
+        // TODD: 中身に*がついていればnをデリファレンス. 変数を一段階リファレンスした結果を返す.
+        int size = n->type && n->type->ty == PTR ? 8 : 4;
+        return new_node_num(size); // 枝はここで終了.
+    }
+    if (consume("+")){
+        return unary();
+    }
+    if (consume("-")){
+        return new_node(ND_SUB, new_node_num(0), unary());
+    }
+    if (consume("&")){
+        return new_node(ND_ADDR, unary(), NULL);
+    }
+    if (consume("*")){
+        return new_node(ND_DEREF, unary(), NULL);
+    }
+    return primary();
+}
+
+// primary    = num
+//             | ident ("(" expr* ")")?
+//             | "(" expr ")"
+Node *primary(){
+    // 次のトークンが"("なら "(" expr ")"のはず
+    if (consume("(")){
+        Node *node = expr();
+        expect(")");
+        return node;
+    }
+    Token *tok = consume_kind(TK_IDENT);
+    if (tok){
+        if (consume("(")){
+            // function call
+            Node *node = calloc(1, sizeof(Node));
+            node->kind = ND_FUNC_CALL;
+            // node->funcname = tok->str;
+            node->funcname = calloc(100, sizeof(char));
+            // node->len = tok->len;
+            memcpy(node->funcname, tok->str, tok->len);
+            // expect(")");
+            // 引数
+            node->block = calloc(10, sizeof(Node));
+            for(int i = 0; !consume(")"); i++){
+                node->block[i] = expr();
+                if(consume(")")){
+                    break;
+                }
+                expect(",");
+            }
+            return node;
+        }
+        // 関数呼び出しでない場合: 変数.
+        return variable(tok);
+    }
+    // そうでなければ数値のはず
+    return new_node_num(expect_number());
+}
+
+
+Node* define_variable(){
+
+    // pointer対策. linked list.
+    Type *type;
+    type = calloc(1, sizeof(Type));
+    type->ty = INT;
+    type->ptr_to = NULL;
+    while (consume("*")){// pointerであれば
+        Type *t;
+        t = calloc(1, sizeof(Type));
+        t->ty = PTR;
+        t->ptr_to = type;
+        type = t; // これ, 大丈夫? overwriteしてない?
+    }// pointer宣言しているので, type, t自体はアドレスが入っている
+     // なので, typeというpointerはt->ptr_toに入れているので, overwriteしておk
+     // typeにt(pointer)を入れて, このtのpointerを次のt->ptr_toにまた入れる, を繰り返す.
+    
+    Token *tok = consume_kind(TK_IDENT); // 識別子
+    if (tok == NULL){
+        error("Invalid args");
+    }
+
+    // 配列かチェック
+    int offset_size = type->ty == ARRAY ? 8 : 4; // 4byteのデータの型(intとか)の配列を想定
+    // もしarray(int)なら, 4*配列サイズ. 変数(int)なら8.
+    while (consume("[")){ // 二重, 三重,...配列に対応
+        Type *t;
+        t = calloc(1, sizeof(Type));
+        t->ty = PTR;
+        t->ptr_to = type;
+        t->array_size = expect_number();
+        type = t;
+        offset_size *= t->array_size;
+        //type->ty = ARRAY;
+        //type->array_size =expect_number(); // 中身の数字を返してくれる.
+        expect("]");
+    }
+
+    // REVIEW: offset_sizeを8の倍数に合わせる
+    while((offset_size%8) != 0){
+        offset_size += 4;
+    }
+    Node *node = calloc(1, sizeof(Node));//未定義の変数の分のメモリを確保
+    node->kind = ND_LVAR;
+    LVar *lvar = find_lvar(tok);
+    if(lvar != NULL){
+        char name[100] = {0};
+        memcpy(name, tok->str, tok->len);
+        error("redefined variable: %s", name);
+    }
+    lvar = calloc(1, sizeof(LVar));
+    lvar->next = locals[cur_func];
+    lvar->name = tok->str;
+    lvar->len = tok->len;
+    if (locals[cur_func] == NULL){
+        lvar->offset = 8;
+    }else{
+        lvar->offset = locals[cur_func]->offset + offset_size;
+    }
+    lvar->type = type; // Type *typeで定義した情報を
+    node->offset = lvar->offset;
+    node->type = lvar->type;
+    locals[cur_func] = lvar;
+    return node;
+}
+
+Node* variable(Token *tok){
+    Node *node = calloc(1, sizeof(Node));//未定義の変数の分のメモリを確保
+    node->kind = ND_LVAR;
+    LVar *lvar = find_lvar(tok);
+    if(lvar == NULL){
+        char name[100] = {0};
+        memcpy(name, tok->str, tok->len);
+        error("undefined variable: %s", name);
+    }
+    node->offset = lvar->offset;
+    node->type = lvar->type;
+    return node;
+}

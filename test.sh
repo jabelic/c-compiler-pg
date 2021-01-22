@@ -26,6 +26,10 @@ assert 0 "int main() {
   int a[10];
   return 0;
 }"
+assert 0 "int main() {
+  int a[5][5];
+  return 0;
+}"
 
 # sizeof
 assert 4 "int main() {

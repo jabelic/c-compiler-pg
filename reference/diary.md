@@ -737,8 +737,16 @@ printf(".L.end.%03d:\n", id);
 
 ## part23
 
-[ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+[ステップ21: 配列を実装する - 低レイヤを知りたい人のためのCコンパイラ作成入門](https://www.sigbus.info/compilerbook#%E3%82%B9%E3%83%86%E3%83%83%E3%83%9721-%E9%85%8D%E5%88%97%E3%82%92%E5%AE%9F%E8%A3%85%E3%81%99%E3%82%8B)
 [ - github/pluswing/c_compiler]()
+- 配列に構造体を代入した時に, そのアクセス方法は
+ `int offset = locals[cur_func]->offset;`
+ `int offset = locals[cur_func][0].offset;`
+ の二つ.
+- ` locals[cur_func][0]`というのは汎用ポインタというやつである.
+  - [汎用ポインタ](http://wisdom.sakura.ne.jp/programming/c/c47.html)
+
+
 
 
 ## part24
@@ -746,3 +754,13 @@ printf(".L.end.%03d:\n", id);
 [ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
 [ - github/pluswing/c_compiler]()
 
+
+## part25
+
+[ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+[ - github/pluswing/c_compiler]()
+
+## part26
+
+[ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
+[ - github/pluswing/c_compiler]()
