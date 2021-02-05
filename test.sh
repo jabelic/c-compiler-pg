@@ -47,10 +47,10 @@ assert 4 "int main() {
 assert 4 "int main() {
     return sizeof(1);
 }"
-# assert 8 "int main() {
-#     int *x;
-#     return sizeof(x+8);
-# }"
+assert 8 "int main() {
+    int *x;
+    return sizeof(x+8);
+}"
 
 assert 4 "int main() {
   return sizeof(sizeof(1));

@@ -133,6 +133,7 @@ Node *primary();
 extern Node *code[];
 Node *define_variable();
 Node *variable(Token *tok);
+Type *get_type(Node *node);
 
 void gen(Node *node);
 void gen_lval(Node *node);

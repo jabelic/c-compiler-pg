@@ -289,8 +289,9 @@ Node *mul(){
 Node *unary(){//ちゃんと数字にpointerが当たってから見るぞ！！と言うやつ.
     if (consume_kind(TK_SIZEOF)){
         Node *n = unary(); // これが中身. sizeofが入っていても対応できる. 中身の処理はせずに, 捨てる.
+        Type *t = get_type(n);
         // TODD: 中身に*がついていればnをデリファレンス. 変数を一段階リファレンスした結果を返す.
-        int size = n->type && n->type->ty == PTR ? 8 : 4;
+        int size = t && t->ty == PTR ? 8 : 4;
         return new_node_num(size); // 枝はここで終了.
     }
     if (consume("+")){
@@ -305,14 +306,28 @@ Node *unary(){//ちゃんと数字にpointerが当たってから見るぞ！！
     if (consume("*")){
         return new_node(ND_DEREF, unary(), NULL);
     }
-    if (consume_kind(TK_SIZEOF)){
-        Node *n = unary();
-        // TODO: nから木を辿って, 変数を探す
-        // *(デリファレンス)があれば, 変数を1段階でリファレンスした結果を返す必要がある
-        int size = n->type && n->type->ty == PTR ? 8 : 4;
-        return new_node_num(size);
-    }
     return primary();
+}
+
+Type *get_type(Node *node){
+    if (node == NULL) {
+        return NULL;
+    }
+    if (node->type){
+        return node->type; 
+    }
+    Type *t = get_type(node->lhs);
+    if (t == NULL){ // lhsにはnodeがない場合
+        t = get_type(node->rhs);
+    }
+    if (t && node->kind == ND_DEREF){ // node dereference(ポインタのこと)
+        t = t->ptr_to;
+        if (t == NULL){
+            error("invalid dereference");
+        }
+        return t;
+    }
+    return t;
 }
 
 // primary    = num
