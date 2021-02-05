@@ -305,6 +305,13 @@ Node *unary(){//ちゃんと数字にpointerが当たってから見るぞ！！
     if (consume("*")){
         return new_node(ND_DEREF, unary(), NULL);
     }
+    if (consume_kind(TK_SIZEOF)){
+        Node *n = unary();
+        // TODO: nから木を辿って, 変数を探す
+        // *(デリファレンス)があれば, 変数を1段階でリファレンスした結果を返す必要がある
+        int size = n->type && n->type->ty == PTR ? 8 : 4;
+        return new_node_num(size);
+    }
     return primary();
 }
 
@@ -376,7 +383,7 @@ Node* define_variable(){
     while (consume("[")){ // 二重, 三重,...配列に対応
         Type *t;
         t = calloc(1, sizeof(Type));
-        t->ty = PTR;
+        t->ty = ARRAY;
         t->ptr_to = type;
         t->array_size = expect_number();
         type = t;
@@ -390,6 +397,7 @@ Node* define_variable(){
     while((offset_size%8) != 0){
         offset_size += 4;
     }
+
     Node *node = calloc(1, sizeof(Node));//未定義の変数の分のメモリを確保
     node->kind = ND_LVAR;
     LVar *lvar = find_lvar(tok);

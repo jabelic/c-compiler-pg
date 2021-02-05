@@ -746,9 +746,15 @@ printf(".L.end.%03d:\n", id);
 - ` locals[cur_func][0]`というのは汎用ポインタというやつである.
   - [汎用ポインタ](http://wisdom.sakura.ne.jp/programming/c/c47.html)
 
+- ファイル分割の構成を変えた.
+  - `tokenize.c`: トークナイズ
+  - `parse.c`: 再帰下降構文解析
+  - `codegen.c`: アセンブリコードを標準出力
 
-
-
+- 配列のサイズは合計で8byteの倍数で取らなければならないらしい
+  - つまり、8n+4byteだと+4byteしなければならない
+  - int型の配列のときは注意！
+  
 ## part24
 
 [ - 低レイヤを知りたい人のためのCコンパイラ作成入門]()
