@@ -18,7 +18,7 @@ Node *new_node_num(int val){
 /*
 四則演算, 比較, 変数, 代入, セミコロン.
 program    = func*
-func       = "int" ident "(" "int" ident ")" stmt
+func       = "int" ident "(" ("int" ident ("," "int" ident)*)? ")" stmt
 stmt       = expr ";" 
             | "{" stmt* "}"
             | "if" "(" expr ")" stmt ("else" stmt)?
@@ -32,7 +32,7 @@ equality   = relational ("==" relational | "!=" relational)*
 relational = add ("<" add | "<=" add | ">" add | ">=" add)*
 add        = mul ("+" mul | "-" mul)*
 mul        = unary ("*" unary | "/" unary)*
-unary      = ("+" | "-" | "*" | "&" )? primary
+unary      = "sizeof" unary | ("+" | "-" | "*" | "&" )? primary
 primary    = num
             | ident ("(" expr* ")")?
             | "(" expr ")"
@@ -250,7 +250,8 @@ Node *add(){
     for(;;){ // 無限ループ.
         if (consume("+")){
             Node *r = mul();
-            if (node->type && node->type->ty == PTR){
+            // 配列とポインタ演算. (配列要素へのアクセスは実質ポインタ演算)
+            if (node->type && (node->type->ty == PTR || node->type->ty == ARRAY)){
                 int n = node->type->ptr_to->ty == INT ? 4 : 8;
                 r = new_node(ND_MUL, r, new_node_num(n)); // + に続く式
             }
@@ -258,7 +259,7 @@ Node *add(){
             // node = new_node(ND_ADD, node, mul());
         }else if (consume("-")){
             Node *r = mul();
-            if (node->type && node->type->ty == PTR){
+            if (node->type && (node->type->ty == PTR || node->type->ty == ARRAY)){
                 int n = node->type->ptr_to->ty == INT ? 4 : 8;
                 r = new_node(ND_MUL, r, new_node_num(n));
             }

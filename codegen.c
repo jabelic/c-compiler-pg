@@ -142,7 +142,13 @@ void gen(Node *node){
         printf("  push %d\n", node->val);
         return;
     case ND_LVAR:
+        // アドレスを取って, RAXにいれる
         gen_lval(node);
+        Type *t = get_type(node);
+        // アドレスの中身(値)を取ってくる
+        if(t && t->ty == ARRAY){
+            return;
+        }
         printf("  pop rax\n");
         printf("  mov rax, [rax]\n");
         printf("  push rax\n");
