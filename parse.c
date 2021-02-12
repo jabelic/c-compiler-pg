@@ -438,6 +438,7 @@ Node* define_variable(){
     return node;
 }
 
+// a[x] は　*(a+x)
 Node* variable(Token *tok){
     Node *node = calloc(1, sizeof(Node));//未定義の変数の分のメモリを確保
     node->kind = ND_LVAR;
@@ -449,5 +450,16 @@ Node* variable(Token *tok){
     }
     node->offset = lvar->offset;
     node->type = lvar->type;
+    while(consume("[")){
+        // *(a + 1)
+        Node *add = calloc(1, sizeof(Node));
+        add->kind = ND_ADD;
+        add->lhs = node;
+        add->rhs = expr(); // 上の例では, 1
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_DEREF;
+        node->lhs = add;
+        expect("]");
+    }
     return node;
 }
