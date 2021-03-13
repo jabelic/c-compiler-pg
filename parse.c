@@ -54,43 +54,68 @@ void program(){
 Node *func(){
     cur_func++;
     Node *node;
-    if (!consume_kind(TK_TYPE)){
+    Define *def = read_define();
+
+    if(consume("(")){ // hoge()のように, 名前の後に(が来ていれば関数.
+        node = calloc(1, sizeof(Node));
+        node->kind = ND_FUNC_DEF;
+        node->funcname = calloc(100, sizeof(char));
+        node->args = calloc(10, sizeof(Node*));
+        memcpy(node->funcname, def->ident->str, def->ident->len);
+
+        for(int i = 0; !consume(")"); i++){
+            if (consume_kind(TK_TYPE)){
+                error("function arges type not found");
+            }
+            node->args[i] = define_variable(read_define());
+            if (consume(")")) { // これいる？？？
+                break;
+            }
+            expect(",");
+        }
+
+        // expect(")");
+        // expect("{");
+        // node->block = calloc(100, sizeof(Node));
+        // for(int i = 0; !consume("}"); i++){
+        //     node->block[i] = stmt();
+        // }
+        node->lhs = stmt();
+        return node;
+    }else{
+        // 変数定義
+        define_variable(def); // TODO: グローバル変数の登録
+    }
+}
+
+/** 関数か変数の定義の前半部分を読んで, LVarに詰める.*/
+Define *read_define(){
+    if (!consume_kind(TK_TYPE)){ // 型が付いているかどうか(今はまだint only)
         error("function return type not found");
     }
+    Type *type = calloc(1, sizeof(Type));
+    type->ty = INT; // 今はintしかないので.
+    type->ptr_to = NULL;
+    while (consume("*")){// pointerであれば
+        Type *t;
+        t = calloc(1, sizeof(Type));
+        t->ty = PTR;
+        t->ptr_to = type;
+        type = t;
+    }
+    // TODO: *を読む(dereference). 関数名の先頭とかに付いてるやつ. 変数でも同じこと.
+
+    // TK_IDENT 識別子: reservedWordsのこと. intとかforとかwhileとか. 
     Token *tok = consume_kind(TK_IDENT);
     if(tok == NULL){
-        error("This is not a function."); // int for(;;){}とか.
+        error("This is not a function and variable."); // int for(;;){}とか. 関数名に予約語使うなよーということ
     }
-    node = calloc(1, sizeof(Node));
-    node->kind = ND_FUNC_DEF;
-    node->funcname = calloc(100, sizeof(char));
-    node->args = calloc(10, sizeof(Node*));
-    memcpy(node->funcname, tok->str, tok->len);
-    expect("(");// 次にtokenをつなげる
-    for(int i = 0; !consume(")"); i++){
-        if (consume_kind(TK_TYPE)){
-            error("function arges type not found");
-        }
-        // Token *tok = consume_kind(TK_IDENT);
-        // if (tok == NULL){
-        //     error("Invalid args");
-        // }
-        node->args[i] = define_variable();
-        if (consume(")")) { // これいる？？？
-            break;
-        }
-        expect(",");
-    }
-
-    // expect(")");
-    // expect("{");
-    // node->block = calloc(100, sizeof(Node));
-    // for(int i = 0; !consume("}"); i++){
-    //     node->block[i] = stmt();
-    // }
-    node->lhs = stmt();
-    return node;
+    Define *def = calloc(1, sizeof(Define));
+    def->type = type;
+    def->ident = tok;
+    return def;
 }
+
 
 // stmt       = expr ";" 
 //             | "{" stmt* "}"
@@ -371,28 +396,11 @@ Node *primary(){
 }
 
 
-Node* define_variable(){
-
-    // pointer対策. linked list.
-    Type *type;
-    type = calloc(1, sizeof(Type));
-    type->ty = INT;
-    type->ptr_to = NULL;
-    while (consume("*")){// pointerであれば
-        Type *t;
-        t = calloc(1, sizeof(Type));
-        t->ty = PTR;
-        t->ptr_to = type;
-        type = t; // これ, 大丈夫? overwriteしてない?
-    }// pointer宣言しているので, type, t自体はアドレスが入っている
-     // なので, typeというpointerはt->ptr_toに入れているので, overwriteしておk
-     // typeにt(pointer)を入れて, このtのpointerを次のt->ptr_toにまた入れる, を繰り返す.
-    
-    Token *tok = consume_kind(TK_IDENT); // 識別子
-    if (tok == NULL){
-        error("Invalid args");
+Node* define_variable(Define *def){
+    if(def == NULL){
+        error("invalid define");
     }
-
+    Type *type = def->type;
     // 配列かチェック
     int offset_size = type->ty == ARRAY ? 8 : 4; // 4byteのデータの型(intとか)の配列を想定
     // もしarray(int)なら, 4*配列サイズ. 変数(int)なら8.
@@ -416,16 +424,16 @@ Node* define_variable(){
 
     Node *node = calloc(1, sizeof(Node));//未定義の変数の分のメモリを確保
     node->kind = ND_LVAR;
-    LVar *lvar = find_lvar(tok);
+    LVar *lvar = find_lvar(def->ident);
     if(lvar != NULL){
         char name[100] = {0};
-        memcpy(name, tok->str, tok->len);
+        memcpy(name, def->ident->str, def->ident->len);
         error("redefined variable: %s", name);
     }
     lvar = calloc(1, sizeof(LVar));
     lvar->next = locals[cur_func];
-    lvar->name = tok->str;
-    lvar->len = tok->len;
+    lvar->name = def->ident->str;
+    lvar->len = def->ident->len;
     if (locals[cur_func] == NULL){
         lvar->offset = 8;
     }else{

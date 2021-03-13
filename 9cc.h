@@ -52,6 +52,13 @@ struct LVar {
     Type *type;
 };
 
+typedef struct Define Define;
+
+struct Define{
+    Type *type;
+    Token *ident;
+};
+
 extern char *user_input;
 
 // 現在着目しているトークン
@@ -134,6 +141,7 @@ extern Node *code[];
 Node *define_variable();
 Node *variable(Token *tok);
 Type *get_type(Node *node);
+Define *read_define();
 
 void gen(Node *node);
 void gen_lval(Node *node);

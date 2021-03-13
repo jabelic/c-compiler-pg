@@ -21,7 +21,18 @@ assert(){
     fi
 }
 
+# global variables 
+
+assert 1 "
+int a;
+int b[10]
+int main(){
+  return 1;
+}"
+
+
 # array pointer
+# 2D array cannot be conpiled
 assert 3 "int main() {
   int a[2];
   a[0] = 1;
