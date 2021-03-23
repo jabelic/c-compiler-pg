@@ -104,6 +104,7 @@ Define *read_define() {
     return def;
 }
 
+
 // stmt       = expr ";" 
 //             | "{" stmt* "}"
 //             | "if" "(" expr ")" stmt ("else" stmt)?
@@ -116,7 +117,7 @@ Node *stmt(){
     if(consume("{")){
         node = calloc(1, sizeof(Node));
         node->kind = ND_BLOCK;
-        node->block = calloc(100, sizeof(Node));
+        node->block = calloc(100, sizeof(Node)); // TODO: literal
         for(int i = 0; !consume("}"); i++){
             node->block[i] = stmt();
         }
@@ -406,6 +407,8 @@ Node* define_variable(Define *def){
     }
 
     Node *node = calloc(1, sizeof(Node));//未定義の変数の分のメモリを確保
+    // node->varname = calloc(100, sizeof(char));
+    // memcpy(node->varname, def->ident->str, def->ident->len)
     node->kind = ND_LVAR;
     LVar *lvar = find_lvar(def->ident);
     if(lvar != NULL){

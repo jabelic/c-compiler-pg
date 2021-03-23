@@ -33,7 +33,6 @@ struct Token{
     char *str;      // トークン文字列
     int len;    // トークンの長さ : 識別子が==など, 2つになる場合も加味したい.
 };
-// linked listを書いている??
 
 typedef struct Type Type;
 struct Type {
@@ -63,6 +62,7 @@ extern char *user_input;
 extern Token *token;
 
 extern LVar *locals[];
+extern LVar *globals[];
 extern int cur_func;
 
 void error(char *fmt,...);
@@ -103,6 +103,7 @@ typedef enum{
     ND_FUNC_DEF, // define function
     ND_ADDR, // &
     ND_DEREF, // *
+    ND_GVAR, // グローバル変数
 } NodeKind;
 
 typedef struct Node Node;
@@ -118,6 +119,8 @@ struct Node{
     int val;    // kindがND_NUMの場合のみ使う.
     int offset; // kindがND_LVERの場合のみ使う.
     Type *type; // kindがND_LVERの場合のみ使う.
+    char *varname; // only kind === ND_*VAR
+    int size;  // only kind === ND_*VAR
 };
 
 

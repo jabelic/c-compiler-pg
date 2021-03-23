@@ -31,6 +31,7 @@ int main() {
 "
 
 # array pointer
+# 2D array cannot be conpiled
 assert 3 "int main() {
   int a[2];
   a[0] = 1;
