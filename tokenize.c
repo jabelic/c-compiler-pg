@@ -7,6 +7,7 @@ Token *token;
 
 // 複数文字のlocal変数
 LVar *locals[100];
+LVar *globals[100];
 int cur_func = 0;
 
 void error_at(char *loc, char *fmt, ...){

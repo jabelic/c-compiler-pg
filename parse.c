@@ -64,34 +64,28 @@ Node *func(){
         memcpy(node->funcname, def->ident->str, def->ident->len);
 
         for(int i = 0; !consume(")"); i++){
-            if (consume_kind(TK_TYPE)){
-                error("function arges type not found");
-            }
-            node->args[i] = define_variable(read_define());
+            node->args[i] = define_variable(read_define(), locals);
             if (consume(")")) { // これいる？？？
                 break;
             }
             expect(",");
         }
 
-        // expect(")");
-        // expect("{");
-        // node->block = calloc(100, sizeof(Node));
-        // for(int i = 0; !consume("}"); i++){
-        //     node->block[i] = stmt();
-        // }
         node->lhs = stmt();
         return node;
     }else{
         // 変数定義
-        define_variable(def); // TODO: グローバル変数の登録
+        node = define_variable(def, globals); // TODO: グローバル変数の登録
+        node->kind = ND_GVAR;
+        expect(";");
+        return node;
     }
 }
 
 /** 関数か変数の定義の前半部分を読んで, LVarに詰める.*/
 Define *read_define(){
     if (!consume_kind(TK_TYPE)){ // 型が付いているかどうか(今はまだint only)
-        error("function return type not found");
+        return NULL;
     }
     Type *type = calloc(1, sizeof(Type));
     type->ty = INT; // 今はintしかないので.
@@ -129,7 +123,7 @@ Node *stmt(){
     if(consume("{")){
         node = calloc(1, sizeof(Node));
         node->kind = ND_BLOCK;
-        node->block = calloc(100, sizeof(Node));
+        node->block = calloc(100, sizeof(Node)); // TODO: literal
         for(int i = 0; !consume("}"); i++){
             node->block[i] = stmt();
         }
@@ -198,12 +192,9 @@ Node *stmt(){
         expect(";");
         return node;
     }
-    if (consume_kind(TK_TYPE)){
-        // Token *tok = consume_kind(TK_IDENT);
-        // if (tok == NULL){
-        //     error("Invalid define variable");
-        // }
-        node = define_variable();
+    Define *def = read_define();
+    if (def){
+        node = define_variable(def, locals);
         expect(";");
         return node;
     } 
@@ -396,13 +387,15 @@ Node *primary(){
 }
 
 
-Node* define_variable(Define *def){
+Node* define_variable(Define *def, LVar **varlist){
     if(def == NULL){
         error("invalid define");
+        // return NULL;
     }
     Type *type = def->type;
     // 配列かチェック
-    int offset_size = type->ty == ARRAY ? 8 : 4; // 4byteのデータの型(intとか)の配列を想定
+    int offset_size = type->ty == PTR ? 8 : 4; // 4byteのデータの型(intとか)の配列を想定
+    
     // もしarray(int)なら, 4*配列サイズ. 変数(int)なら8.
     while (consume("[")){ // 二重, 三重,...配列に対応
         Type *t;
@@ -412,8 +405,6 @@ Node* define_variable(Define *def){
         t->array_size = expect_number();
         type = t;
         offset_size *= t->array_size;
-        //type->ty = ARRAY;
-        //type->array_size =expect_number(); // 中身の数字を返してくれる.
         expect("]");
     }
 
@@ -423,26 +414,30 @@ Node* define_variable(Define *def){
     }
 
     Node *node = calloc(1, sizeof(Node));//未定義の変数の分のメモリを確保
+    node->varname = calloc(100, sizeof(char));
+    memcpy(node->varname, def->ident->str, def->ident->len);
     node->kind = ND_LVAR;
+    node->size = offset_size;
     LVar *lvar = find_lvar(def->ident);
     if(lvar != NULL){
-        char name[100] = {0};
-        memcpy(name, def->ident->str, def->ident->len);
-        error("redefined variable: %s", name);
+        error("redefined variable: %s", node->varname);
+        // char name[100] = {0};
+        // memcpy(name, def->ident->str, def->ident->len);
+        // error("redefined variable: %s", name);
     }
     lvar = calloc(1, sizeof(LVar));
-    lvar->next = locals[cur_func];
+    lvar->next = varlist[cur_func];
     lvar->name = def->ident->str;
     lvar->len = def->ident->len;
-    if (locals[cur_func] == NULL){
-        lvar->offset = 8;
+    if (varlist[cur_func] == NULL){
+        lvar->offset = offset_size;
     }else{
-        lvar->offset = locals[cur_func]->offset + offset_size;
+        lvar->offset = varlist[cur_func]->offset + offset_size;
     }
     lvar->type = type; // Type *typeで定義した情報を
     node->offset = lvar->offset;
     node->type = lvar->type;
-    locals[cur_func] = lvar;
+    varlist[cur_func] = lvar;
     return node;
 }
 
