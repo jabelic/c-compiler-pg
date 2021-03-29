@@ -30,6 +30,7 @@ void gen(Node *node){
     case ND_GVAR:
         printf("%s:\n", node->varname);
         printf("  .zero %d\n", node->size);
+        return;
     case ND_ADDR:
         gen_lval(node->lhs);
         return;

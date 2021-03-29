@@ -62,7 +62,7 @@ Node *func(){
         node->args = calloc(10, sizeof(Node*));
         memcpy(node->funcname, def->ident->str, def->ident->len);
         for(int i = 0; !consume(")"); i++){
-            node->args[i] = define_variable(read_define());
+            node->args[i] = define_variable(read_define(), locals);
             if (consume(")")) { // これいる？？？
                 break;
             }
@@ -71,7 +71,8 @@ Node *func(){
         node->lhs = stmt();
         return node;
     }else{
-        node = define_variable(def);
+        node = define_variable(def, globals);
+        node->kind = ND_GVAR;
         expect(";");
         return node;
     }
@@ -188,7 +189,7 @@ Node *stmt(){
     }
     Define *def = read_define();
     if (def){
-        node = define_variable(def);
+        node = define_variable(def, locals);
         expect(";");
         return node;
     } 
@@ -381,7 +382,7 @@ Node *primary(){
 }
 
 
-Node* define_variable(Define *def){
+Node* define_variable(Define *def, LVar **verlist){
     if (def == NULL){
         error("Invalid args");
     }
@@ -407,28 +408,30 @@ Node* define_variable(Define *def){
     }
 
     Node *node = calloc(1, sizeof(Node));//未定義の変数の分のメモリを確保
-    // node->varname = calloc(100, sizeof(char));
-    // memcpy(node->varname, def->ident->str, def->ident->len)
+    node->varname = calloc(100, sizeof(char));
+    memcpy(node->varname, def->ident->str, def->ident->len);
     node->kind = ND_LVAR;
+    node->size = offset_size;
     LVar *lvar = find_lvar(def->ident);
     if(lvar != NULL){
-        char name[100] = {0};
-        memcpy(name, def->ident->str, def->ident->len);
-        error("redefined variable: %s", name);
+        error("redefined variable: %s", node->varname);
+        // char name[100] = {0};
+        // memcpy(name, def->ident->str, def->ident->len);
+        // error("redefined variable: %s", name);
     }
     lvar = calloc(1, sizeof(LVar));
-    lvar->next = locals[cur_func];
+    lvar->next = verlist[cur_func];
     lvar->name = def->ident->str;
     lvar->len = def->ident->len;
-    if (locals[cur_func] == NULL){
+    if (verlist[cur_func] == NULL){
         lvar->offset = offset_size;
     }else{
-        lvar->offset = locals[cur_func]->offset + offset_size;
+        lvar->offset = verlist[cur_func]->offset + offset_size;
     }
     lvar->type = type; // Type *typeで定義した情報を
     node->offset = lvar->offset;
     node->type = lvar->type;
-    locals[cur_func] = lvar;
+    verlist[cur_func] = lvar;
     return node;
 }
 
